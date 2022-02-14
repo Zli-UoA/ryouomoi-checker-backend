@@ -1,0 +1,191 @@
+openapi: 3.1.0
+info:
+  title: RyouomoiChecker
+  version: '1.0'
+  description: ''
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /friends/search:
+    get:
+      summary: Search Twitter user
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TwitterUser'
+              examples:
+                example-1:
+                  value:
+                    - id: 0
+                      screenNme: yt8492
+                      displayName: マヤミト
+                      imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                      biography: オタクです
+      operationId: get-friends-search
+      security:
+        - dummy_token: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: query
+          description: ユーザー検索で使う文字列
+      description: Twitterのユーザーを検索する
+  /friends/follow:
+    get:
+      summary: Get Twitter followee
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TwitterUser'
+              examples:
+                example-1:
+                  value:
+                    - id: 0
+                      screenNme: yt8492
+                      displayName: マヤミト
+                      imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                      biography: オタクです
+      operationId: get-friends-follow
+      security:
+        - dummy_token: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: query
+          description: ユーザー検索で使う文字列
+      description: Twitterでフォローしている人を取得する
+    parameters: []
+  /friends/follower:
+    get:
+      summary: Get Twitter followee
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TwitterUser'
+              examples:
+                example-1:
+                  value:
+                    - id: 0
+                      screenNme: yt8492
+                      displayName: マヤミト
+                      imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                      biography: オタクです
+      operationId: get-friends-follower
+      security:
+        - dummy_token: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: query
+          description: ユーザー検索で使う文字列
+      description: Twitterのフォローされている人を取得する
+    parameters: []
+  '/friends/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    post:
+      summary: Set love point
+      operationId: post-friends-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  match_success:
+                    type: boolean
+              examples:
+                example-1:
+                  value:
+                    match_success: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lovePoint:
+                  type: number
+            examples:
+              example-1:
+                value:
+                  lovePoint: 3
+      security:
+        - dummy_token: []
+  /me/lover:
+    get:
+      summary: GET current lover
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwitterUser'
+              examples:
+                example-1:
+                  value:
+                    id: 0
+                    screenNme: yt8492
+                    displayName: マヤミト
+                    imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                    biography: オタクです
+        '404':
+          description: Not Found
+      operationId: get-me-lover
+      security:
+        - dummy_token: []
+components:
+  schemas:
+    TwitterUser:
+      title: TwitterUser
+      type: object
+      properties:
+        id:
+          type: integer
+        screenNme:
+          type: string
+        displayName:
+          type: string
+        profileImageUrl:
+          type: string
+        biography:
+          type: string
+      examples:
+        - id: 0
+          screenNme: yt8492
+          displayName: マヤミト
+          imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+          biography: オタクです
+  securitySchemes:
+    dummy_token:
+      type: http
+      scheme: bearer
