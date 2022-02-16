@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS couples (
     user_id_1 BIGINT NOT NULL REFERENCES twitter_users(twitter_id),
     user_id_2 BIGINT NOT NULL REFERENCES twitter_users(twitter_id),
     created_at TIMESTAMP NOT NULL,
-    breaked_at TIMESTAMP
+    broken_at TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS chat_rooms (
