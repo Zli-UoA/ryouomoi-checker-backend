@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   title: RyouomoiChecker
   version: '1.0'
@@ -163,6 +163,57 @@ paths:
       operationId: get-me-lover
       security:
         - dummy_token: []
+  /twitter/login:
+    get:
+      summary: GET Twitter OAuth URL
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loginUrl:
+                    type: string
+      operationId: get-twitter-login
+      description: Get Twitter login url
+    parameters: []
+  /twitter/callback:
+    post:
+      summary: Post OAuth token and verifier
+      operationId: post-twitter-callback
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    token: string
+      description: Post Twitter oauth_token and oauth_verifier
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oauth_token:
+                  type: string
+                oauth_verifier:
+                  type: string
+            examples:
+              example-1:
+                value:
+                  oauth_token: string
+                  oauth_verifier: string
 components:
   schemas:
     TwitterUser:
