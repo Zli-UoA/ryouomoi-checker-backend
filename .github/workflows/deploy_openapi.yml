@@ -11,7 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Run a multi-line script
+      - name: Upload OpenAPI index.html
         uses: actions/upload-artifact@v2
         with:
-          path: openapi
+          path: openapi/index.html
+
+      - name: Upload OpenAPI openapi.yaml
+        uses: actions/upload-artifact@v2
+        with:
+          path: openapi/openapi.yaml
