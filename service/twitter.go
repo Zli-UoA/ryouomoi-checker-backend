@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/mrjones/oauth"
-	"log"
 	"strconv"
 )
 
@@ -119,7 +118,6 @@ func (c *twitterServiceImpl) GetFollowers(token *oauth.AccessToken) ([]*model.Tw
 		if err != nil {
 			return nil, err
 		}
-		log.Println(res.StatusCode)
 		if res.StatusCode != 200 {
 			return nil, errors.New("twitter api response error")
 		}
@@ -165,7 +163,6 @@ func (c *twitterServiceImpl) GetFollowees(token *oauth.AccessToken) ([]*model.Tw
 		if err != nil {
 			return nil, err
 		}
-		log.Println(res.StatusCode)
 		if res.StatusCode != 200 {
 			return nil, errors.New("twitter api response error")
 		}
@@ -207,7 +204,6 @@ func (c *twitterServiceImpl) Search(token *oauth.AccessToken, query string) ([]*
 	if err != nil {
 		return nil, err
 	}
-	log.Println(res.StatusCode)
 	if res.StatusCode != 200 {
 		return nil, errors.New("twitter api response error")
 	}

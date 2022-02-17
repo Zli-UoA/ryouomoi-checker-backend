@@ -48,7 +48,7 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 
 func (u *userRepositoryImpl) GetUser(id int64) (*model.User, error) {
 	twitterUser := TwitterUser{}
-	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=$1", id)
+	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=?", id)
 	if err != nil {
 		return nil, err
 	}
