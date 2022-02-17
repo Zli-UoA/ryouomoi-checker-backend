@@ -37,7 +37,7 @@ paths:
           name: query
           description: ユーザー検索で使う文字列
       description: Twitterのユーザーを検索する
-  /friends/follow:
+  /friends/followee:
     get:
       summary: Get Twitter followee
       tags: []
@@ -185,19 +185,13 @@ paths:
       summary: Post OAuth token and verifier
       operationId: post-twitter-callback
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
+        '302':
+          description: Found
+          headers:
+            Location:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                example-1:
-                  value:
-                    token: string
+                type: string
+              description: リダイレクトする先のフロントのURL
       description: Post Twitter oauth_token and oauth_verifier
       requestBody:
         content:

@@ -67,7 +67,7 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 }
 func (u *userRepositoryImpl) GetUser(id int64) (*model.User, error) {
 	twitterUser := TwitterUser{}
-	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=$1", id)
+	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (u *userRepositoryImpl) CreateUser(user *model.User) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return user, err
+	return user, nil
 }
 
 func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
@@ -128,4 +128,8 @@ func (u *userRepositoryImpl) CreateCouple(userID1, userID2 int64) (*model.Couple
 
 func (u *userRepositoryImpl) UpdateCouple(couple *model.Couple) (*model.Couple, error) { //破局
 	panic("implement me")
+}
+
+func NewUserRepository(db *sqlx.DB) UserRepository {
+	return &userRepositoryImpl{db: db}
 }
