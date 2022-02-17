@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"strconv"
-
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/jmoiron/sqlx"
@@ -23,6 +21,7 @@ type userRepositoryImpl struct {
 	db *sqlx.DB
 }
 
+//dbとアプリ内のuserの変換
 func convertToUser(twitterUser *TwitterUser) *model.User {
 	user := model.User{
 		ID:                 twitterUser.TwitterID,
@@ -33,6 +32,16 @@ func convertToUser(twitterUser *TwitterUser) *model.User {
 		TwitterAccessToken: service.CreateAccessToken(twitterUser.AccessToken, twitterUser.AccessTokenSecret),
 	}
 	return &user
+}
+func convertToUserLoverPoint(userLovePoint *UserLovePoint) *model.UserLovePoint {
+	point := model.UserLovePoint{
+		ID:          userLovePoint.ID,
+		UserID:      userLovePoint.User.TwitterID,
+		LoverUserID: userLovePoint.LoverUserID,
+		LovePoint:   userLovePoint.LovePoint,
+	}
+	return &point
+
 }
 
 func convertToTwitterUser(user *model.User) *TwitterUser {
@@ -47,7 +56,6 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 	}
 	return &twitterUser
 }
-
 func (u *userRepositoryImpl) GetUser(id int64) (*model.User, error) {
 	twitterUser := TwitterUser{}
 	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=$1", id)
@@ -75,13 +83,13 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
-func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) {
-	userLoverPoint := UserLoverPoint{}
-	err := u.db.Get(&userLoverPoint, "SELECT * FROM user_lover_points WHERE userID = $1 AND loverUserID = $2",userID,loverUserID)
-	if err != nil{
-		return nil,err
+func (u *userRepositoryImpl) GetLoverPoint(userID, loverUserID int64) (*model.UserLovePoint, error) {
+	userLovePoint := UserLovePoint{}
+	err := u.db.Get(&userLovePoint, "SELECT * FROM user_lover_points WHERE userID = $1 AND loverUserID = $2", userID, loverUserID)
+	if err != nil {
+		return nil, err
 	}
-	return  userLoverPoint,nil//返り値どうにかしよう?
+	return convertToUserLoverPoint(&userLovePoint), nil //返り値どうにかしよう?
 }
 
 func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) {
