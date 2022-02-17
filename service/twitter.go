@@ -45,6 +45,13 @@ const (
 	twitterAPIEndpoint = "https://api.twitter.com/1.1"
 )
 
+func CreateAccessToken(accessToken, accessTokenSecret string) *oauth.AccessToken {
+	return &oauth.AccessToken{
+		Token:  accessToken,
+		Secret: accessTokenSecret,
+	}
+}
+
 func (c *twitterServiceImpl) GetLoginUrl() (string, error) {
 	rToken, loginUrl, err := c.consumer.GetRequestTokenAndUrl(c.callbackUrl)
 	if err != nil {
