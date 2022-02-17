@@ -51,17 +51,24 @@ func main() {
 	}
 
 	ur := repository.NewUserRepository(db)
+
 	ts := service.NewTwitterService(apiKey, apiKeySecret, callbackUrl)
 	ujs := service.NewUserJWTService(jwtSecret)
+
 	gtluu := usecase.NewGetTwitterLoginUrlUseCase(ts)
 	htcu := usecase.NewHandleTwitterCallbackUseCase(ts, ujs, ur)
+	fsu := usecase.NewFriendsSearchUseCase(ts, ur)
+
 	tc := controller.NewTwitterController(frontRedirectUrl, gtluu, htcu)
+	fc := controller.NewFriendsController(ujs, fsu)
 
 	r := gin.Default()
 	r.Use(cors.Default())
 
 	r.GET("/twitter/login", tc.GetTwitterLoginUrl)
 	r.GET("/twitter/callback", tc.HandleTwitterCallback)
+
+	r.GET("/friends/search", fc.FriendsSearch)
 
 	r.Run(":8080")
 }
