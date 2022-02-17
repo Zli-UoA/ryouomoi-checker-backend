@@ -28,20 +28,20 @@ type userObject struct {
 }
 
 type usersObject struct {
-	Users []userObject `json:"users"`
-	NextCursor int `json:"next_cursor"`
+	Users      []userObject `json:"users"`
+	NextCursor int          `json:"next_cursor"`
 }
 
 type twitterServiceImpl struct {
-	consumer *oauth.Consumer
-	callbackUrl string
+	consumer        *oauth.Consumer
+	callbackUrl     string
 	requestTokenMap map[string]*oauth.RequestToken
 }
 
 const (
-	requestTokenURL = "https://api.twitter.com/oauth/request_token"
-	authorizationURL = "https://api.twitter.com/oauth/authenticate"
-	accessTokenURL = "https://api.twitter.com/oauth/access_token"
+	requestTokenURL    = "https://api.twitter.com/oauth/request_token"
+	authorizationURL   = "https://api.twitter.com/oauth/authenticate"
+	accessTokenURL     = "https://api.twitter.com/oauth/access_token"
 	twitterAPIEndpoint = "https://api.twitter.com/1.1"
 )
 
@@ -89,11 +89,11 @@ func (c *twitterServiceImpl) GetUser(token *oauth.AccessToken) (*model.TwitterUs
 	}
 
 	user := &model.TwitterUser{
-		ID: userObj.ID,
-		DisplayName: userObj.Name,
-		ScreenName: userObj.ScreenName,
+		ID:              userObj.ID,
+		DisplayName:     userObj.Name,
+		ScreenName:      userObj.ScreenName,
 		ProfileImageUrl: userObj.ProfileImageURL,
-		Biography: userObj.Description,
+		Biography:       userObj.Description,
 	}
 	return user, nil
 }
@@ -127,11 +127,11 @@ func (c *twitterServiceImpl) GetFollowers(token *oauth.AccessToken) ([]*model.Tw
 
 		for _, userObj := range usersObj.Users {
 			users = append(users, &model.TwitterUser{
-				ID: userObj.ID,
-				DisplayName: userObj.Name,
-				ScreenName: userObj.ScreenName,
+				ID:              userObj.ID,
+				DisplayName:     userObj.Name,
+				ScreenName:      userObj.ScreenName,
 				ProfileImageUrl: userObj.ProfileImageURL,
-				Biography: userObj.Description,
+				Biography:       userObj.Description,
 			})
 		}
 
@@ -173,11 +173,11 @@ func (c *twitterServiceImpl) GetFollowees(token *oauth.AccessToken) ([]*model.Tw
 
 		for _, userObj := range usersObj.Users {
 			users = append(users, &model.TwitterUser{
-				ID: userObj.ID,
-				DisplayName: userObj.Name,
-				ScreenName: userObj.ScreenName,
+				ID:              userObj.ID,
+				DisplayName:     userObj.Name,
+				ScreenName:      userObj.ScreenName,
 				ProfileImageUrl: userObj.ProfileImageURL,
-				Biography: userObj.Description,
+				Biography:       userObj.Description,
 			})
 		}
 
@@ -215,11 +215,11 @@ func (c *twitterServiceImpl) Search(token *oauth.AccessToken, query string) ([]*
 
 	for _, userObj := range *usersObj {
 		users = append(users, &model.TwitterUser{
-			ID: userObj.ID,
-			DisplayName: userObj.Name,
-			ScreenName: userObj.ScreenName,
+			ID:              userObj.ID,
+			DisplayName:     userObj.Name,
+			ScreenName:      userObj.ScreenName,
 			ProfileImageUrl: userObj.ProfileImageURL,
-			Biography: userObj.Description,
+			Biography:       userObj.Description,
 		})
 	}
 	return users, nil
@@ -230,9 +230,9 @@ func NewTwitterService(consumerKey, consumerSecret, callbackUrl string) TwitterS
 		consumerKey,
 		consumerSecret,
 		oauth.ServiceProvider{
-			RequestTokenUrl: requestTokenURL,
+			RequestTokenUrl:   requestTokenURL,
 			AuthorizeTokenUrl: authorizationURL,
-			AccessTokenUrl: accessTokenURL,
+			AccessTokenUrl:    accessTokenURL,
 		})
 	return &twitterServiceImpl{
 		consumer:        consumer,
