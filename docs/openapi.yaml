@@ -37,7 +37,7 @@ paths:
           name: query
           description: ユーザー検索で使う文字列
       description: Twitterのユーザーを検索する
-  /friends/follow:
+  /friends/followee:
     get:
       summary: Get Twitter followee
       tags: []
