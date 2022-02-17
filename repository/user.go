@@ -61,7 +61,7 @@ func (u *userRepositoryImpl) CreateUser(user *model.User) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return user, err
+	return user, nil
 }
 
 func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
@@ -93,4 +93,8 @@ func (u *userRepositoryImpl) CreateCouple(userID1, userID2 int64) (*model.Couple
 
 func (u *userRepositoryImpl) UpdateCouple(couple *model.Couple) (*model.Couple, error) {
 	panic("implement me")
+}
+
+func NewUserRepository(db *sqlx.DB) UserRepository {
+	return &userRepositoryImpl{db: db}
 }
