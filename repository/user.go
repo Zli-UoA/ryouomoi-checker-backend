@@ -85,7 +85,7 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 
 func (u *userRepositoryImpl) GetLoverPoint(userID, loverUserID int64) (*model.UserLovePoint, error) {
 	userLovePoint := UserLovePoint{}
-	err := u.db.Get(&userLovePoint, "SELECT * FROM user_lover_points WHERE userID = $1 AND loverUserID = $2", userID, loverUserID)
+	err := u.db.Get(&userLovePoint, "SELECT * FROM user_lover_points WHERE user_id = $1 AND lover_user_id = $2", userID, loverUserID)
 	if err != nil {
 		return nil, err
 	}
