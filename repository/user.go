@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"strconv"
+
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/jmoiron/sqlx"
@@ -74,9 +76,12 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 }
 
 func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) {
-	//userLoverPoint := UserLoverPoint{}
-	//err := u.db.Get(&userLoverPoint, "SELECT ulp.id id, lover_user_id, love_point, tu.twitter_id , screen_name, display_name, profile_image_url, biography, access_token, access_token_secret")
-	panic("implement me")
+	userLoverPoint := UserLoverPoint{}
+	err := u.db.Get(&userLoverPoint, "SELECT * FROM user_lover_points WHERE userID = $1 AND loverUserID = $2",userID,loverUserID)
+	if err != nil{
+		return nil,err
+	}
+	return  userLoverPoint,nil//返り値どうにかしよう?
 }
 
 func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) {

@@ -40,4 +40,3 @@ type Chats struct {
 	Message    string      `db:"message"`
 	CreatedAt  time.Time   `db:"created_at"`
 }
-
