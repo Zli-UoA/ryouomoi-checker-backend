@@ -33,7 +33,7 @@ func convertToUser(twitterUser *TwitterUser) *model.User {
 	}
 	return &user
 }
-func convertToUserLoverPoint(userLovePoint *UserLovePoint) *model.UserLovePoint {
+func convertToUserLovePoint(userLovePoint *UserLovePoint) *model.UserLovePoint {
 	point := model.UserLovePoint{
 		ID:          userLovePoint.ID,
 		UserID:      userLovePoint.User.TwitterID,
@@ -83,13 +83,13 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
-func (u *userRepositoryImpl) GetLoverPoint(userID, loverUserID int64) (*model.UserLovePoint, error) {
+func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) {
 	userLovePoint := UserLovePoint{}
 	err := u.db.Get(&userLovePoint, "SELECT * FROM user_lover_points WHERE user_id = $1 AND lover_user_id = $2", userID, loverUserID)
 	if err != nil {
 		return nil, err
 	}
-	return convertToUserLoverPoint(&userLovePoint), nil //返り値どうにかしよう?
+	return convertToUserLovePoint(&userLovePoint), nil //返り値どうにかしよう?
 }
 
 func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) {
