@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
+	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -22,13 +23,12 @@ type userRepositoryImpl struct {
 
 func convertToUser(twitterUser *TwitterUser) *model.User {
 	user := model.User{
-		ID:                twitterUser.TwitterID,
-		ScreenName:        twitterUser.ScreenName,
-		DisplayName:       twitterUser.DisplayName,
-		ProfileImageUrl:   twitterUser.ProfileImageUrl,
-		Biography:         twitterUser.Biography,
-		AccessToken:       twitterUser.AccessToken,
-		AccessTokenSecret: twitterUser.AccessTokenSecret,
+		ID:                 twitterUser.TwitterID,
+		ScreenName:         twitterUser.ScreenName,
+		DisplayName:        twitterUser.DisplayName,
+		ProfileImageUrl:    twitterUser.ProfileImageUrl,
+		Biography:          twitterUser.Biography,
+		TwitterAccessToken: service.CreateAccessToken(twitterUser.AccessToken, twitterUser.AccessTokenSecret),
 	}
 	return &user
 }
@@ -40,8 +40,8 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 		DisplayName:       user.DisplayName,
 		ProfileImageUrl:   user.ProfileImageUrl,
 		Biography:         user.Biography,
-		AccessToken:       user.AccessToken,
-		AccessTokenSecret: user.AccessTokenSecret,
+		AccessToken:       user.TwitterAccessToken.Token,
+		AccessTokenSecret: user.TwitterAccessToken.Secret,
 	}
 	return &twitterUser
 }
