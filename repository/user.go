@@ -94,15 +94,19 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 
 func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) {
 	userLovePoint := UserLovePoint{}
-	err := u.db.Get(&userLovePoint, "SELECT * FROM user_lover_points WHERE user_id = $1 AND lover_user_id = $2", userID, loverUserID)
+	err := u.db.Get(&userLovePoint, "SELECT * FROM user_lover_points WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
 	if err != nil {
 		return nil, err
 	}
 	return convertToUserLovePoint(&userLovePoint), nil
 }
-
 func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) {
-	panic("implement me")
+	points := convertToUserLovePoint(point)
+	_, err := u.db.NamedExec("UPDATE user_love_points SET love_point=?",points.LovePoint)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //一番最近の破
