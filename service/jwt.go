@@ -14,6 +14,11 @@ type userJWTServiceImpl struct {
 	secret string
 }
 
+type customClaims struct {
+	ID int64 `json:"userID"`
+	jwt.StandardClaims
+}
+
 func (u *userJWTServiceImpl) CreateUserIDJWT(userID int64) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod(jwt.SigningMethodHS256.Alg()))
 	claims := token.Claims.(jwt.MapClaims)
@@ -26,7 +31,7 @@ func (u *userJWTServiceImpl) CreateUserIDJWT(userID int64) (string, error) {
 }
 
 func (u *userJWTServiceImpl) GetUserIDFromJWT(token string) (int64, error) {
-	t, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	t, err := jwt.ParseWithClaims(token, &customClaims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
 		}
@@ -35,7 +40,9 @@ func (u *userJWTServiceImpl) GetUserIDFromJWT(token string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return t.Claims.(jwt.MapClaims)["userID"].(int64), nil
+
+	userID := t.Claims.(*customClaims).ID
+	return userID, nil
 }
 
 func NewUserJWTService(secret string) UserJWTService {
