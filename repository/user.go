@@ -43,7 +43,16 @@ func convertToUserLovePoint(userLovePoint *UserLovePoint) *model.UserLovePoint {
 	return &point
 
 }
-
+func convertToCouple(couple *Couple) *model.Couple {
+	cp := model.Couple{
+		ID:        couple.ID,
+		User1:     convertToUser(&couple.UserID1),
+		User2:     convertToUser(&couple.UserID2),
+		CreatedAt: &couple.CreatedAt,
+		BrokenAt:  &couple.BrokenAt,
+	}
+	return &cp
+}
 func convertToTwitterUser(user *model.User) *TwitterUser {
 	twitterUser := TwitterUser{
 		TwitterID:         user.ID,
@@ -89,21 +98,30 @@ func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.Use
 	if err != nil {
 		return nil, err
 	}
-	return convertToUserLovePoint(&userLovePoint), nil //返り値どうにかしよう?
+	return convertToUserLovePoint(&userLovePoint), nil
 }
 
 func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) {
 	panic("implement me")
 }
 
-func (u *userRepositoryImpl) GetCouple(userID int64) (*model.Couple, error) {
+func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //一番最近の破
+	//一件もなかったらnilを返す
 	panic("implement me")
 }
-
-func (u *userRepositoryImpl) CreateCouple(userID1, userID2 int64) (*model.Couple, error) {
+func (u *userRepositoryImpl) GerCurrentCouple(userID int64) (*model.Couple, error) { //今のlover
+	//一件もなかったらnil
 	panic("implement me")
 }
+func (u *userRepositoryImpl) CreateCouple(userID1, userID2 int64) (*model.Couple, error) { //カップル成立
+	couple := Couple{}
+	_, err := u.db.Exec("INSERT INTO couples (user_id_1,user_id_2,created_at) VALUES ($1,$2,CURRENT_TIMESTAMP)", userID1, userID2)
+	if err != nil {
+		return nil, err
+	}
+	return convertToCouple(&couple), nil
+}
 
-func (u *userRepositoryImpl) UpdateCouple(couple *model.Couple) (*model.Couple, error) {
+func (u *userRepositoryImpl) UpdateCouple(couple *model.Couple) (*model.Couple, error) { //破局
 	panic("implement me")
 }
