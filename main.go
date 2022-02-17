@@ -4,6 +4,7 @@ import (
 	"github.com/Zli-UoA/ryouomoi-checker-backend/controller"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/usecase"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
@@ -26,6 +27,8 @@ func main() {
 	tc := controller.NewTwitterController(gtluu)
 
 	r := gin.Default()
+	r.Use(cors.Default())
+
 	r.GET("/twitter/login", tc.GetTwitterLoginUrl)
 
 	r.Run(":8080")
