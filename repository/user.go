@@ -14,8 +14,8 @@ type UserRepository interface {
 	UpdateUser(user *model.User) (*model.User, error)
 	GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error)
 	SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error)
-	GetCouple(userID int64) (*model.Couple, error)
-	CreateCouple(userID1, userID2 int64) (*model.Couple, error)
+	GetCurrentCouple(userID int64) (*model.Couple, error)
+	CreateCouple(couple *model.Couple) (*model.Couple, error)
 	UpdateCouple(couple *model.Couple) (*model.Couple, error)
 }
 
@@ -68,19 +68,33 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 }
 func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) { // test done
 	userLovePoint := UserLovePoint{}
-	err := u.db.Get(&userLovePoint, "SELECT * FROM user_love_points WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
+	err := u.db.Get(&userLovePoint, "SELECT u.id id, t.twitter_id \"user.twitter_id\", t.screen_name \"user.screen_name\", t.display_name \"user.display_name\", t.profile_image_url \"user.profile_image_url\", t.biography \"user.biography\", u.lover_user_id lover_user_id, u.love_point love_point FROM user_love_points u JOIN twitter_users t ON t.twitter_id = u.user_id WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
 	if err != nil {
 		return nil, err
 	}
 	return convertToUserLovePoint(&userLovePoint), nil
 }
-func (u *userRepositoryImpl) SetLovePoint(point *UserLovePoint) (*model.UserLovePoint, error) { //test done
-	_, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint, point.ID, point.LoverUserID)
+func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) { //test done
+	res, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint, point.ID, point.LoverUserID)
 	if err != nil {
 		return nil, err
 	}
-	points := convertToUserLovePoint(point)
-	return points, nil
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if rows == 0 {
+		res, err = u.db.Exec("INSERT INTO user_love_points (user_id, lover_user_id, love_point) VALUES (?, ?, ?)", point.UserID, point.LoverUserID, point.LovePoint)
+		if err != nil {
+			return nil, err
+		}
+		id, err := res.LastInsertId()
+		if err != nil {
+			return nil, err
+		}
+		point.ID = id
+	}
+	return point, nil
 }
 
 func (u *userRepositoryImpl) UpdateCouple(couple *model.Couple) (*model.Couple, error) { //test done
@@ -148,4 +162,8 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func NewUserRepository(db *sqlx.DB) UserRepository {
+	return &userRepositoryImpl{db: db}
 }

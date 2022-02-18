@@ -11,3 +11,11 @@ type TwitterUser struct {
 	ImageUrl    string `json:"imageUrl"`
 	Biography   string `json:"biography"`
 }
+
+type LovePoint struct {
+	LovePoint int `json:"lovePoint"`
+}
+
+type MatchResult struct {
+	MatchSuccess bool `json:"matchSuccess"`
+}

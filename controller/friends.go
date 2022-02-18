@@ -5,13 +5,15 @@ import (
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/usecase"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 type FriendsController struct {
-	ujs service.UserJWTService
-	fsu usecase.FriendsSearchUseCase
-	gfu usecase.GetFolloweesUseCase
-	fru usecase.GetFollowersUseCase
+	ujs  service.UserJWTService
+	fsu  usecase.FriendsSearchUseCase
+	slpu usecase.SetLovePointUseCase
+	gfu  usecase.GetFolloweesUseCase
+	fru  usecase.GetFollowersUseCase
 }
 
 func convertToJson(twitterUser *model.TwitterUser) *TwitterUser {
@@ -54,7 +56,7 @@ func (f *FriendsController) FriendsSearch(c *gin.Context) {
 	c.JSON(200, jsonArray)
 }
 
-func (f *FriendsController) GetFollowees(c *gin.Context){
+func (f *FriendsController) GetFollowees(c *gin.Context) {
 	token, err := GetAuthToken(c)
 	if err != nil {
 		c.JSON(401, gin.H{
@@ -70,12 +72,6 @@ func (f *FriendsController) GetFollowees(c *gin.Context){
 		return
 	}
 	searchResult, err := f.gfu.Execute(userID)
-	if err != nil {
-		c.JSON(500, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
 	jsonArray := make([]*TwitterUser, len(searchResult))
 	for i, user := range searchResult {
 		jsonArray[i] = convertToJson(user)
@@ -83,7 +79,7 @@ func (f *FriendsController) GetFollowees(c *gin.Context){
 	c.JSON(200, jsonArray)
 }
 
-func (f *FriendsController) GetFollowers(c *gin.Context){
+func (f *FriendsController) GetFollowers(c *gin.Context) {
 	token, err := GetAuthToken(c)
 	if err != nil {
 		c.JSON(401, gin.H{
@@ -99,7 +95,7 @@ func (f *FriendsController) GetFollowers(c *gin.Context){
 		return
 	}
 	searchResult, err := f.fru.Execute(userID)
-	if err!= nil {
+	if err != nil {
 		c.JSON(500, gin.H{
 			"message": err.Error(),
 		})
@@ -112,11 +108,53 @@ func (f *FriendsController) GetFollowers(c *gin.Context){
 	c.JSON(200, jsonArray)
 }
 
-func NewFriendsController(ujs service.UserJWTService, fsu usecase.FriendsSearchUseCase, gfu usecase.GetFolloweesUseCase, fru usecase.GetFollowersUseCase) *FriendsController {
+func (f *FriendsController) SetLovePoint(c *gin.Context) {
+	token, err := GetAuthToken(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	userID, err := f.ujs.GetUserIDFromJWT(token)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	loverUserIDStr := c.Param("id")
+	loverUserID, err := strconv.ParseInt(loverUserIDStr, 10, 64)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	req := &LovePoint{}
+	err = c.ShouldBindJSON(req)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": err.Error(),
+		})
+	}
+	matchSuccess, err := f.slpu.Execute(userID, loverUserID, req.LovePoint)
+	res := MatchResult{MatchSuccess: matchSuccess}
+	c.JSON(200, res)
+}
+
+func NewFriendsController(
+	ujs service.UserJWTService,
+	fsu usecase.FriendsSearchUseCase,
+	slpu usecase.SetLovePointUseCase,
+	gfu usecase.GetFolloweesUseCase,
+	fru usecase.GetFollowersUseCase,
+) *FriendsController {
 	return &FriendsController{
-		ujs: ujs,
-		fsu: fsu,
-		gfu: gfu,
-		fru: fru,
+		ujs:  ujs,
+		fsu:  fsu,
+		slpu: slpu,
+		gfu:  gfu,
+		fru:  fru,
 	}
 }

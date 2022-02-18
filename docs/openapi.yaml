@@ -119,12 +119,12 @@ paths:
               schema:
                 type: object
                 properties:
-                  match_success:
+                  matchSuccess:
                     type: boolean
               examples:
                 example-1:
                   value:
-                    match_success: true
+                    matchSuccess: true
       requestBody:
         content:
           application/json:
