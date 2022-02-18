@@ -12,7 +12,7 @@ type TwitterUser struct {
 	AccessTokenSecret string `db:"access_token_secret"`
 }
 
-type UserLoverPoint struct {
+type UserLovePoint struct {
 	ID          int64       `db:"id"`
 	User        TwitterUser `db:"user"`
 	LoverUserID int64       `db:"lover_user_id"`
