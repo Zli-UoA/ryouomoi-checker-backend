@@ -52,8 +52,8 @@ func convertToUserLovePoint(userLovePoint *UserLovePoint) *model.UserLovePoint {
 func convertToCouple(couple *Couple) *model.Couple {
 	cp := model.Couple{
 		ID:        couple.ID,
-		User1:     convertToUser(&couple.UserID1),
-		User2:     convertToUser(&couple.UserID2),
+		User1:     convertToUser(&couple.User1),
+		User2:     convertToUser(&couple.User2),
 		CreatedAt: &couple.CreatedAt,
 		BrokenAt:  &couple.BrokenAt,
 	}
