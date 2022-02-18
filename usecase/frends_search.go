@@ -11,8 +11,8 @@ type FriendsSearchUseCase interface {
 }
 
 type friendsSearchUseCaseImpl struct {
-	ts  service.TwitterService
-	ur  repository.UserRepository
+	ts service.TwitterService
+	ur repository.UserRepository
 }
 
 func (f *friendsSearchUseCaseImpl) Execute(userID int64, query string) ([]*model.TwitterUser, error) {
@@ -29,7 +29,7 @@ func (f *friendsSearchUseCaseImpl) Execute(userID int64, query string) ([]*model
 
 func NewFriendsSearchUseCase(ts service.TwitterService, ur repository.UserRepository) FriendsSearchUseCase {
 	return &friendsSearchUseCaseImpl{
-		ts:  ts,
-		ur:  ur,
+		ts: ts,
+		ur: ur,
 	}
 }

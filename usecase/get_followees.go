@@ -15,7 +15,7 @@ type getFolloweesUseCaseImpl struct {
 	ur repository.UserRepository
 }
 
-func (g *getFolloweesUseCaseImpl) Execute(userID int64)([]*model.TwitterUser, error) {
+func (g *getFolloweesUseCaseImpl) Execute(userID int64) ([]*model.TwitterUser, error) {
 	user, err := g.ur.GetUser(userID)
 	if err != nil {
 		return nil, err
