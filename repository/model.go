@@ -21,22 +21,29 @@ type UserLovePoint struct {
 
 type Couple struct {
 	ID        int64       `db:"id"`
-	UserID1   TwitterUser `db:"user1"`
-	UserID2   TwitterUser `db:"user2"`
+	User1     TwitterUser `db:"user1"`
+	User2     TwitterUser `db:"user2"`
 	CreatedAt time.Time   `db:"created_at"`
 	BrokenAt  time.Time   `db:"broken_at"`
 }
 
 type ChatRoom struct {
 	ID        int64     `db:"id"`
-	CoupleID  Couple    `db:"couple"`
+	Couple    Couple    `db:"couple"`
 	CreatedAt time.Time `db:"created_at"`
 }
 
 type Chats struct {
-	ID         int64       `db:"id"`
-	ChatRoomID ChatRoom    `db:"chat_room"`
-	UserID     TwitterUser `db:"user"`
-	Message    string      `db:"message"`
-	CreatedAt  time.Time   `db:"created_at"`
+	ID        int64       `db:"id"`
+	ChatRoom  ChatRoom    `db:"chat_room"`
+	User      TwitterUser `db:"user"`
+	Message   string      `db:"message"`
+	CreatedAt time.Time   `db:"created_at"`
+}
+
+type CoupleBrokeReport struct {
+	ID            int64       `db:"id"`
+	Couple        Couple      `db:"couple"`
+	User          TwitterUser `db:"user"`
+	BrokeReasonID int64       `db:"broke_reason_id"`
 }

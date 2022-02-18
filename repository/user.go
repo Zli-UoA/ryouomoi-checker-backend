@@ -13,10 +13,13 @@ type UserRepository interface {
 	CreateUser(user *model.User) (*model.User, error)
 	UpdateUser(user *model.User) (*model.User, error)
 	GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error)
+	GetLovePoints(userID int64) ([]*model.UserLovePoint, error)
 	SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error)
 	GetCurrentCouple(userID int64) (*model.Couple, error)
 	CreateCouple(couple *model.Couple) (*model.Couple, error)
 	UpdateCouple(couple *model.Couple) (*model.Couple, error)
+	CreateBrokeReport(report *model.BrokeReport) (*model.BrokeReport, error)
+	GetBrokeReport(userID, coupleID int64) (*model.BrokeReport, error)
 }
 
 type userRepositoryImpl struct {
@@ -35,6 +38,7 @@ func convertToUser(twitterUser *TwitterUser) *model.User {
 	}
 	return &user
 }
+
 func convertToUserLovePoint(userLovePoint *UserLovePoint) *model.UserLovePoint {
 	point := model.UserLovePoint{
 		ID:          userLovePoint.ID,
@@ -44,16 +48,18 @@ func convertToUserLovePoint(userLovePoint *UserLovePoint) *model.UserLovePoint {
 	}
 	return &point
 }
+
 func convertToCouple(couple *Couple) *model.Couple {
 	cp := model.Couple{
 		ID:        couple.ID,
-		User1:     convertToUser(&couple.UserID1),
-		User2:     convertToUser(&couple.UserID2),
+		User1:     convertToUser(&couple.User1),
+		User2:     convertToUser(&couple.User2),
 		CreatedAt: &couple.CreatedAt,
 		BrokenAt:  &couple.BrokenAt,
 	}
 	return &cp
 }
+
 func convertToTwitterUser(user *model.User) *TwitterUser {
 	twitterUser := TwitterUser{
 		TwitterID:         user.ID,
@@ -66,6 +72,7 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 	}
 	return &twitterUser
 }
+
 func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) { // test done
 	userLovePoint := UserLovePoint{}
 	err := u.db.Get(&userLovePoint, "SELECT u.id id, t.twitter_id \"user.twitter_id\", t.screen_name \"user.screen_name\", t.display_name \"user.display_name\", t.profile_image_url \"user.profile_image_url\", t.biography \"user.biography\", u.lover_user_id lover_user_id, u.love_point love_point FROM user_love_points u JOIN twitter_users t ON t.twitter_id = u.user_id WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
@@ -74,6 +81,11 @@ func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.Use
 	}
 	return convertToUserLovePoint(&userLovePoint), nil
 }
+
+func (u *userRepositoryImpl) GetLovePoints(userID int64) ([]*model.UserLovePoint, error) {
+	panic("implement me")
+}
+
 func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) { //test done
 	res, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint, point.ID, point.LoverUserID)
 	if err != nil {
@@ -120,6 +132,7 @@ func (u *userRepositoryImpl) CreateCouple(couple *model.Couple) (*model.Couple, 
 	couple.CreatedAt = &time_now
 	return couple, nil
 }
+
 func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //未テスト TwitterUserのとこどうしよう
 	cp := Couple{} //user1でいい?user2の可能性もありそう
 	err := u.db.Get(&cp, "SELECT * FROM couples WHERE user_id_1 = ? OR user_id_2 = ? ORDER BY broken_at DESC LIMIT 1", userID, userID)
@@ -128,6 +141,7 @@ func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple,
 	}
 	return convertToCouple(&cp), nil
 }
+
 func (u *userRepositoryImpl) GetCurrentCouple(userID int64) (*model.Couple, error) { //未テスト 今のlover
 	//一件もなかったらnil
 	cp := Couple{}
@@ -137,6 +151,7 @@ func (u *userRepositoryImpl) GetCurrentCouple(userID int64) (*model.Couple, erro
 	}
 	return convertToCouple(&cp), err
 }
+
 func (u *userRepositoryImpl) GetUser(id int64) (*model.User, error) { //未テスト そのまま(?のとこだけ変えた)
 	twitterUser := TwitterUser{}
 	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=?", id)
@@ -162,6 +177,14 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (u *userRepositoryImpl) CreateBrokeReport(report *model.BrokeReport) (*model.BrokeReport, error) {
+	panic("implement me")
+}
+
+func (u *userRepositoryImpl) GetBrokeReport(userID, coupleID int64) (*model.BrokeReport, error) {
+	panic("implement me")
 }
 
 func NewUserRepository(db *sqlx.DB) UserRepository {

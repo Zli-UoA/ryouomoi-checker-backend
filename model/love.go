@@ -16,3 +16,10 @@ type Couple struct {
 	CreatedAt *time.Time
 	BrokenAt  *time.Time
 }
+
+type BrokeReport struct {
+	ID            int64
+	Couple        Couple
+	User          TwitterUser
+	BrokeReasonID int64 // init.sql参照
+}
