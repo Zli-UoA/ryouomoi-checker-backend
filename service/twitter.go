@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
@@ -15,6 +16,7 @@ type TwitterService interface {
 	GetFollowees(token *oauth.AccessToken) ([]*model.TwitterUser, error)
 	GetFollowers(token *oauth.AccessToken) ([]*model.TwitterUser, error)
 	Search(token *oauth.AccessToken, query string) ([]*model.TwitterUser, error)
+	SendDirectMessage(token *oauth.AccessToken, toUserID int64, content string) error
 }
 
 type userObject struct {
@@ -226,6 +228,39 @@ func (c *twitterServiceImpl) Search(token *oauth.AccessToken, query string) ([]*
 		})
 	}
 	return users, nil
+}
+
+func (c *twitterServiceImpl) SendDirectMessage(token *oauth.AccessToken, toUserID int64, content string) error {
+	httpClient, err := c.consumer.MakeHttpClient(token)
+	if err != nil {
+		return err
+	}
+	body := map[string]interface{}{
+		"event": map[string]interface{}{
+			"type": "message_create",
+			"message_create": map[string]interface{}{
+				"target": map[string]interface{}{
+					"recipient_id": toUserID,
+				},
+				"message_data": map[string]interface{}{
+					"text": content,
+				},
+			},
+		},
+	}
+	jsonBytes, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	_, err = httpClient.Post(
+		twitterAPIEndpoint+"/direct_messages/events/new.json",
+		"application/json",
+		bytes.NewBuffer(jsonBytes),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewTwitterService(consumerKey, consumerSecret, callbackUrl string) TwitterService {
