@@ -15,7 +15,7 @@ type FriendsController struct {
 func convertToJson(twitterUser *model.TwitterUser) *TwitterUser {
 	return &TwitterUser{
 		ID:          twitterUser.ID,
-		ScreenNme:   twitterUser.ScreenName,
+		ScreenName:  twitterUser.ScreenName,
 		DisplayName: twitterUser.DisplayName,
 		ImageUrl:    twitterUser.ProfileImageUrl,
 		Biography:   twitterUser.Biography,
