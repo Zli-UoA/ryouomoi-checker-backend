@@ -40,3 +40,10 @@ type Chats struct {
 	Message    string      `db:"message"`
 	CreatedAt  time.Time   `db:"created_at"`
 }
+
+type CoupleBrokeReport struct {
+	ID            int64       `db:"id"`
+	Couple        Couple      `db:"couple"`
+	User          TwitterUser `db:"user"`
+	BrokeReasonID int64       `db:"broke_reason_id"`
+}
