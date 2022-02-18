@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS twitter_users (
     access_token_secret VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS user_lover_points (
+CREATE TABLE IF NOT EXISTS user_love_points (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL REFERENCES twitter_users(twitter_id),
     lover_user_id BIGINT NOT NULL,
