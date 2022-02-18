@@ -65,6 +65,8 @@ func main() {
 	htcu := usecase.NewHandleTwitterCallbackUseCase(ts, ujs, ur)
 	fsu := usecase.NewFriendsSearchUseCase(ts, ur)
 	slpu := usecase.NewSetLovePointUseCase(5, botUserID, ur, bts)
+	gfu := usecase.NewGetFolloweesUseCase(ts, ur)
+	fru := usecase.NewGetFollowersUseCase(ts, ur)
 
 	tc := controller.NewTwitterController(frontRedirectUrl, gtluu, htcu)
 	btc := controller.NewTwitterController(
@@ -72,7 +74,7 @@ func main() {
 		usecase.NewGetTwitterLoginUrlUseCase(bts),
 		usecase.NewHandleTwitterCallbackUseCase(bts, ujs, ur),
 	)
-	fc := controller.NewFriendsController(ujs, fsu, slpu)
+	fc := controller.NewFriendsController(ujs, fsu, slpu, gfu, fru)
 
 	r := gin.Default()
 	r.Use(cors.Default())

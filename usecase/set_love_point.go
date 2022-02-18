@@ -34,9 +34,17 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 		LoverUserID: loverUserID,
 		LovePoint:   lovePoint,
 	}
-	_, err := s.ur.SetLovePoint(userLovePoint)
+	user, err := s.ur.GetUser(userID)
 	if err != nil {
 		return false, err
+	}
+	_, err = s.ur.SetLovePoint(userLovePoint)
+	if err != nil {
+		return false, err
+	}
+	loverUser, err := s.ur.GetUser(loverUserID)
+	if err != nil {
+		return false, nil
 	}
 	loverUserLovePoint, err := s.ur.GetLovePoint(loverUserID, userID)
 	if err != nil {
@@ -45,7 +53,11 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 	if lovePoint+loverUserLovePoint.LovePoint < s.thresholdLovePoint {
 		return false, nil
 	}
-	couple, err := s.ur.CreateCouple(userID, loverUserID)
+	couple := &model.Couple{
+		User1: user,
+		User2: loverUser,
+	}
+	_, err = s.ur.CreateCouple(couple)
 	if err != nil {
 		return false, err
 	}
