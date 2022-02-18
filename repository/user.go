@@ -67,14 +67,14 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 }
 func (u *userRepositoryImpl) GetUser(id int64) (*model.User, error) {
 	twitterUser := TwitterUser{}
-	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=$1", id)
+	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=?", id)
 	if err != nil {
 		return nil, err
 	}
 	return convertToUser(&twitterUser), nil
 }
 
-func (u *userRepositoryImpl) CreateUser(user *model.User) (*model.User, error) {
+func (u *userRepositoryImpl) CreateUser(user *model.User) (*model.User, error) { //未テスト
 	twitterUser := convertToTwitterUser(user)
 	_, err := u.db.NamedExec("INSERT INTO twitter_users (twitter_id, screen_name, display_name, profile_image_url, biography, access_token, access_token_secret) VALUES (:twitter_id, :screen_name, :display_name, :profile_image_url, :biography, :access_token, :access_token_secret)", twitterUser)
 	if err != nil {
@@ -83,7 +83,7 @@ func (u *userRepositoryImpl) CreateUser(user *model.User) (*model.User, error) {
 	return user, err
 }
 
-func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
+func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) { //未テスト
 	twitterUser := convertToTwitterUser(user)
 	_, err := u.db.NamedExec("UPDATE twitter_users SET screen_name=:screen_name, display_name=:display_name, profile_image_url=:profile_image_url, biography=:biography, access_token=:access_token, access_token_secret=:access_token_secret WHERE twitter_id=:twitter_id", twitterUser)
 	if err != nil {
@@ -92,7 +92,7 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
-func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) {
+func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) { // test done
 	userLovePoint := UserLovePoint{}
 	err := u.db.Get(&userLovePoint, "SELECT * FROM user_lover_points WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
 	if err != nil {
@@ -100,13 +100,13 @@ func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.Use
 	}
 	return convertToUserLovePoint(&userLovePoint), nil
 }
-func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) {
-	points := convertToUserLovePoint(point)
-	_, err := u.db.NamedExec("UPDATE user_love_points SET love_point=?", points.LovePoint)
+func (u *userRepositoryImpl) SetLovePoint(point *UserLovePoint) (*model.UserLovePoint, error) {//done
+	_, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint,point.ID,point.LoverUserID)
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	points := convertToUserLovePoint(point)
+	return points, nil
 }
 
 func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //一番最近の破
@@ -117,7 +117,7 @@ func (u *userRepositoryImpl) GetCurrentCouple(userID int64) (*model.Couple, erro
 	//一件もなかったらnil
 	panic("implement me")
 }
-func (u *userRepositoryImpl) CreateCouple(userID1, userID2 int64) (*model.Couple, error) { //カップル成立
+func (u *userRepositoryImpl) CreateCouple(userID1, userID2 int64) (*model.Couple, error) { //test done
 	couple := Couple{}
 	_, err := u.db.Exec("INSERT INTO couples (user_id_1,user_id_2,created_at) VALUES ($1,$2,CURRENT_TIMESTAMP)", userID1, userID2)
 	if err != nil {
