@@ -5,9 +5,9 @@ type TwitterLoginUrlJson struct {
 }
 
 type TwitterUser struct {
-	ID          int64  `db:"id"`
-	ScreenNme   string `db:"screenNme"`
-	DisplayName string `db:"displayName"`
-	ImageUrl    string `db:"imageUrl"`
-	Biography   string `db:"biography"`
+	ID          int64  `json:"id"`
+	ScreenName  string `json:"screenName"`
+	DisplayName string `json:"displayName"`
+	ImageUrl    string `json:"imageUrl"`
+	Biography   string `json:"biography"`
 }
