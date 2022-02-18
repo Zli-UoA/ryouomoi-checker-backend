@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/jmoiron/sqlx"
@@ -41,7 +43,6 @@ func convertToUserLovePoint(userLovePoint *UserLovePoint) *model.UserLovePoint {
 		LovePoint:   userLovePoint.LovePoint,
 	}
 	return &point
-
 }
 func convertToCouple(couple *Couple) *model.Couple {
 	cp := model.Couple{
@@ -65,7 +66,7 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 	}
 	return &twitterUser
 }
-func (u *userRepositoryImpl) GetUser(id int64) (*model.User, error) {
+func (u *userRepositoryImpl) GetUser(id int64) (*model.User, error) { //未テスト
 	twitterUser := TwitterUser{}
 	err := u.db.Get(&twitterUser, "SELECT * FROM twitter_users WHERE twitter_id=?", id)
 	if err != nil {
@@ -100,8 +101,8 @@ func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.Use
 	}
 	return convertToUserLovePoint(&userLovePoint), nil
 }
-func (u *userRepositoryImpl) SetLovePoint(point *UserLovePoint) (*model.UserLovePoint, error) {//done
-	_, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint,point.ID,point.LoverUserID)
+func (u *userRepositoryImpl) SetLovePoint(point *UserLovePoint) (*model.UserLovePoint, error) { //test done
+	_, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint, point.ID, point.LoverUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -110,22 +111,37 @@ func (u *userRepositoryImpl) SetLovePoint(point *UserLovePoint) (*model.UserLove
 }
 
 func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //一番最近の破
-	//一件もなかったらnilを返す
-	panic("implement me")
+	cp := Couple{}
+	err := u.db.Get(&cp, "SELECT * FROM couples WHERE user_id_1 = ?", userID)
+	if err != nil {
+		return nil, err
+	}
+	return convertToCouple(&cp), nil
 }
 func (u *userRepositoryImpl) GetCurrentCouple(userID int64) (*model.Couple, error) { //今のlover
 	//一件もなかったらnil
 	panic("implement me")
 }
-func (u *userRepositoryImpl) CreateCouple(userID1, userID2 int64) (*model.Couple, error) { //test done
-	couple := Couple{}
-	_, err := u.db.Exec("INSERT INTO couples (user_id_1,user_id_2,created_at) VALUES ($1,$2,CURRENT_TIMESTAMP)", userID1, userID2)
+func (u *userRepositoryImpl) CreateCouple(couple *model.Couple) (*model.Couple, error) { //test done
+	userID1 := couple.User1.ID
+	userID2 := couple.User2.ID
+	time_now := time.Now()
+	_, err := u.db.Exec("INSERT INTO couples (user_id_1,user_id_2,created_at) VALUES (?,?,?)", userID1, userID2, time_now)
 	if err != nil {
 		return nil, err
 	}
-	return convertToCouple(&couple), nil
+	couple.CreatedAt = &time_now
+	return couple, nil
 }
 
-func (u *userRepositoryImpl) UpdateCouple(couple *model.Couple) (*model.Couple, error) { //破局
-	panic("implement me")
+func (u *userRepositoryImpl) UpdateCouple(couple *model.Couple) (*model.Couple, error) { //test done
+	userID1 := couple.User1.ID
+	userID2 := couple.User2.ID
+	time_now := time.Now()
+	_, err := u.db.Exec("UPDATE couples SET broken_at =  ? where user_id_1 = ? AND user_id_2= ?", time_now, userID1, userID2)
+	if err != nil {
+		return nil, err
+	}
+	couple.BrokenAt = &time_now
+	return couple, nil
 }
