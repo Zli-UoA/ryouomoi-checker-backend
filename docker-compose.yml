@@ -9,6 +9,7 @@ services:
     volumes:
       - ./openapi:/openapi
   db:
+    platform: linux/x86_64
     image: mysql:8.0.28
     volumes:
       - db-data:/var/lib/mysql

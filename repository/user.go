@@ -68,7 +68,7 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 }
 func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) { // test done
 	userLovePoint := UserLovePoint{}
-	err := u.db.Get(&userLovePoint, "SELECT * FROM user_lover_points WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
+	err := u.db.Get(&userLovePoint, "SELECT * FROM user_love_points WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple,
 func (u *userRepositoryImpl) GetCurrentCouple(userID int64) (*model.Couple, error) { //未テスト 今のlover
 	//一件もなかったらnil
 	cp := Couple{}
-	err := u.db.Get(&cp, "SELECT * FROM couples WHERE broken_at IS NULL AND (user_id_1 = ? OR user_id_2 = ?);", userID, userID)//sqlはオッケー
+	err := u.db.Get(&cp, "SELECT * FROM couples WHERE broken_at IS NULL AND (user_id_1 = ? OR user_id_2 = ?);", userID, userID) //sqlはオッケー
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (u *userRepositoryImpl) CreateUser(user *model.User) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return user, err
+	return user, nil
 }
 
 func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) { //未テスト そのまま

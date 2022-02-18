@@ -23,7 +23,7 @@ paths:
                 example-1:
                   value:
                     - id: 0
-                      screenNme: yt8492
+                      screenName: yt8492
                       displayName: マヤミト
                       imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
                       biography: オタクです
@@ -37,7 +37,7 @@ paths:
           name: query
           description: ユーザー検索で使う文字列
       description: Twitterのユーザーを検索する
-  /friends/follow:
+  /friends/followee:
     get:
       summary: Get Twitter followee
       tags: []
@@ -54,7 +54,7 @@ paths:
                 example-1:
                   value:
                     - id: 0
-                      screenNme: yt8492
+                      screenName: yt8492
                       displayName: マヤミト
                       imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
                       biography: オタクです
@@ -86,7 +86,7 @@ paths:
                 example-1:
                   value:
                     - id: 0
-                      screenNme: yt8492
+                      screenName: yt8492
                       displayName: マヤミト
                       imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
                       biography: オタクです
@@ -154,7 +154,7 @@ paths:
                 example-1:
                   value:
                     id: 0
-                    screenNme: yt8492
+                    screenName: yt8492
                     displayName: マヤミト
                     imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
                     biography: オタクです
@@ -185,19 +185,13 @@ paths:
       summary: Post OAuth token and verifier
       operationId: post-twitter-callback
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
+        '302':
+          description: Found
+          headers:
+            Location:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              examples:
-                example-1:
-                  value:
-                    token: string
+                type: string
+              description: リダイレクトする先のフロントのURL
       description: Post Twitter oauth_token and oauth_verifier
       requestBody:
         content:
@@ -222,7 +216,7 @@ components:
       properties:
         id:
           type: integer
-        screenNme:
+        screenName:
           type: string
         displayName:
           type: string
@@ -232,7 +226,7 @@ components:
           type: string
       examples:
         - id: 0
-          screenNme: yt8492
+          screenName: yt8492
           displayName: マヤミト
           imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
           biography: オタクです
