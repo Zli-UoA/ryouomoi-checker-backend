@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS couples (
 
 CREATE TABLE IF NOT EXISTS couple_broke_reasons (
     id BIGINT PRIMARY KEY,
-    text VARCHAR(255) NOT NULL UNIQUE,
+    text VARCHAR(255) NOT NULL UNIQUE
 );
 
 INSERT INTO couple_broke_reasons (id, text) VALUES (1, '価値観の違い');
