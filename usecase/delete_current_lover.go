@@ -10,7 +10,7 @@ import (
 )
 
 type DeleteCurrentLoverUseCase interface {
-	Execute(userID int64, brokeReport *model.BrokeReport) error
+	Execute(userID int64, brokeReason int, allowShare bool) error
 }
 
 type deleteCurrentLoverUseCaseImpl struct {
@@ -40,20 +40,35 @@ func createTweetContent(couple *model.Couple) string {
 	return content
 }
 
-func (d *deleteCurrentLoverUseCaseImpl) Execute(userID int64, brokeReport *model.BrokeReport) error {
+func (d *deleteCurrentLoverUseCaseImpl) Execute(userID int64, brokeReason int, allowShare bool) error {
 	couple, err := d.ur.GetCurrentCouple(userID)
 	if err != nil {
 		return err
 	}
+	var user *model.User
+	var lover *model.User
+	if couple.User1.ID == userID {
+		user = couple.User1
+		lover = couple.User2
+	} else {
+		user = couple.User2
+		lover = couple.User1
+	}
 	now := time.Now()
 	couple.BrokenAt = &now
 	_, err = d.ur.UpdateCouple(couple)
+	if err != nil {
+		return err
+	}
+	brokeReport := &model.BrokeReport{
+		Couple:        couple,
+		User:          user,
+		BrokeReasonID: brokeReason,
+		AllowShare:    allowShare,
+	}
 	_, err = d.ur.CreateBrokeReport(brokeReport)
-	var lover *model.User
-	if couple.User1.ID == userID {
-		lover = couple.User2
-	} else {
-		lover = couple.User1
+	if err != nil {
+		return err
 	}
 	err = d.ur.DeleteLovePoint(userID, lover.ID)
 	if err != nil {
@@ -68,7 +83,7 @@ func (d *deleteCurrentLoverUseCaseImpl) Execute(userID int64, brokeReport *model
 		log.Println(err)
 		return nil
 	}
-	if brokeReport.AllowShare && existingBrokeReport.AllowShare {
+	if allowShare && existingBrokeReport.AllowShare {
 		err = d.ts.SendTweet(botUser.TwitterAccessToken, createTweetContent(couple))
 		if err != nil {
 			log.Println(err)
