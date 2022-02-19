@@ -23,7 +23,7 @@ paths:
                 example-1:
                   value:
                     - id: 0
-                      screenName: yt8492
+                      screenNme: yt8492
                       displayName: マヤミト
                       imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
                       biography: オタクです
@@ -54,7 +54,7 @@ paths:
                 example-1:
                   value:
                     - id: 0
-                      screenName: yt8492
+                      screenNme: yt8492
                       displayName: マヤミト
                       imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
                       biography: オタクです
@@ -86,7 +86,7 @@ paths:
                 example-1:
                   value:
                     - id: 0
-                      screenName: yt8492
+                      screenNme: yt8492
                       displayName: マヤミト
                       imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
                       biography: オタクです
@@ -119,12 +119,12 @@ paths:
               schema:
                 type: object
                 properties:
-                  matchSuccess:
+                  match_success:
                     type: boolean
               examples:
                 example-1:
                   value:
-                    matchSuccess: true
+                    match_success: true
       requestBody:
         content:
           application/json:
@@ -149,12 +149,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TwitterUser'
+                $ref: '#/components/schemas/UserLovePoint'
               examples:
                 example-1:
                   value:
                     id: 0
-                    screenName: yt8492
+                    screenNme: yt8492
                     displayName: マヤミト
                     imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
                     biography: オタクです
@@ -163,6 +163,25 @@ paths:
       operationId: get-me-lover
       security:
         - dummy_token: []
+    delete:
+      summary: Delete Current Lover
+      operationId: delete-me-lover
+      responses:
+        '200':
+          description: OK
+      description: 破局手続きをする
+      security:
+        - dummy_token: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reasonId:
+                  type: integer
+                  description: '1: 価値観の違い, 2: 趣味・嗜好の違い, 3: 冷めた・嫌いになった, 4: 他に好きな人ができた, 5: 自然消滅, 6: その他'
+        description: Broke Reason
   /twitter/login:
     get:
       summary: GET Twitter OAuth URL
@@ -208,6 +227,23 @@ paths:
                 value:
                   oauth_token: string
                   oauth_verifier: string
+  /me/lovers:
+    get:
+      summary: Get UserLovePoint List
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserLovePoint'
+      operationId: get-me-lovers
+      description: 現在設定している好き度一覧を取得する
+      security:
+        - dummy_token: []
 components:
   schemas:
     TwitterUser:
@@ -216,7 +252,7 @@ components:
       properties:
         id:
           type: integer
-        screenName:
+        screenNme:
           type: string
         displayName:
           type: string
@@ -226,10 +262,19 @@ components:
           type: string
       examples:
         - id: 0
-          screenName: yt8492
+          screenNme: yt8492
           displayName: マヤミト
           imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
           biography: オタクです
+      description: ''
+    UserLovePoint:
+      title: UserLovePoint
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/TwitterUser'
+        lovePoint:
+          type: integer
   securitySchemes:
     dummy_token:
       type: http
