@@ -1,6 +1,11 @@
 package main
 
 import (
+	"log"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/Zli-UoA/ryouomoi-checker-backend/controller"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/repository"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
@@ -10,15 +15,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
-	"log"
-	"os"
-	"strconv"
 )
 
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println(err)
 	}
 }
 
@@ -35,6 +37,7 @@ func connectDB() (*sqlx.DB, error) {
 		if err == nil {
 			return db, nil
 		}
+		time.Sleep(100 * time.Millisecond)
 	}
 	return nil, err
 }

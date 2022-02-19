@@ -24,7 +24,17 @@ services:
       MYSQL_DATABASE: ryouomoi-checker-db
     ports:
       - "3306:3306"
-
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ryouomoi-checker-server
+    env_file:
+      - .env.compose
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
 volumes:
   db-data:
     driver: local

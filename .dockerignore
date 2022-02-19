@@ -1,0 +1,16 @@
+.editorconfig
+.git
+.gitingore
+.idea/
+.github/
+AUTHORS.md
+CONTRIBUTING.md
+LICENSE
+Makefile
+NOTICE
+README.md
+docker-compose.yml
+arm/
+powerpc/
+mips/
+docs/
