@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -31,9 +32,11 @@ func connectDB() (*sqlx.DB, error) {
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 
+	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true&loc=UTC", dbUser, dbPassword, dbAddress, dbPort, dbName)
+
 	var err error
 	for i := 0; i < 10; i++ {
-		db, err := sqlx.Connect("mysql", dbUser+":"+dbPassword+"@tcp("+dbAddress+":"+dbPort+")/"+dbName)
+		db, err := sqlx.Connect("mysql", dsn)
 		if err == nil {
 			return db, nil
 		}
