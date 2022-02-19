@@ -22,4 +22,5 @@ type BrokeReport struct {
 	Couple        Couple
 	User          TwitterUser
 	BrokeReasonID int64 // init.sql参照
+	AllowShare    bool
 }

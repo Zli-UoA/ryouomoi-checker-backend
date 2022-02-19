@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS couple_broke_reports (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     couple_id BIGINT NOT NULL REFERENCES couples(id),
     user_id BIGINT NOT NULL REFERENCES twitter_users(twitter_id),
-    broke_reason_id BIGINT NOT NULL REFERENCES couple_broke_reasons(id)
+    broke_reason_id BIGINT NOT NULL REFERENCES couple_broke_reasons(id),
+    allow_share BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS chat_rooms (

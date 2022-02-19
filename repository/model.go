@@ -46,4 +46,5 @@ type CoupleBrokeReport struct {
 	Couple        Couple      `db:"couple"`
 	User          TwitterUser `db:"user"`
 	BrokeReasonID int64       `db:"broke_reason_id"`
+	AllowShare    bool        `db:"allow_share"`
 }
