@@ -153,11 +153,13 @@ paths:
               examples:
                 example-1:
                   value:
-                    id: 0
-                    screenNme: yt8492
-                    displayName: マヤミト
-                    imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
-                    biography: オタクです
+                    user:
+                      id: 0
+                      screenNme: yt8492
+                      displayName: マヤミト
+                      imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                      biography: オタクです
+                    lovePoint: 3
         '404':
           description: Not Found
       operationId: get-me-lover
@@ -182,6 +184,33 @@ paths:
                   type: integer
                   description: '1: 価値観の違い, 2: 趣味・嗜好の違い, 3: 冷めた・嫌いになった, 4: 他に好きな人ができた, 5: 自然消滅, 6: その他'
         description: Broke Reason
+  /me/lovers:
+    get:
+      summary: Get UserLovePoint List
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserLovePoint'
+              examples:
+                example-1:
+                  value:
+                    - user:
+                        id: 0
+                        screenNme: yt8492
+                        displayName: マヤミト
+                        imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                        biography: オタクです
+                      lovePoint: 3
+      operationId: get-me-lovers
+      description: 現在設定している好き度一覧を取得する
+      security:
+        - dummy_token: []
   /twitter/login:
     get:
       summary: GET Twitter OAuth URL
@@ -196,6 +225,10 @@ paths:
                 properties:
                   loginUrl:
                     type: string
+              examples:
+                example-1:
+                  value:
+                    loginUrl: string
       operationId: get-twitter-login
       description: Get Twitter login url
     parameters: []
@@ -227,23 +260,6 @@ paths:
                 value:
                   oauth_token: string
                   oauth_verifier: string
-  /me/lovers:
-    get:
-      summary: Get UserLovePoint List
-      tags: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserLovePoint'
-      operationId: get-me-lovers
-      description: 現在設定している好き度一覧を取得する
-      security:
-        - dummy_token: []
 components:
   schemas:
     TwitterUser:
@@ -275,6 +291,7 @@ components:
           $ref: '#/components/schemas/TwitterUser'
         lovePoint:
           type: integer
+      x-examples: {}
   securitySchemes:
     dummy_token:
       type: http
