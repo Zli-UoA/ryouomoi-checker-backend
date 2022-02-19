@@ -183,6 +183,13 @@ paths:
                 reasonId:
                   type: integer
                   description: '1: 価値観の違い, 2: 趣味・嗜好の違い, 3: 冷めた・嫌いになった, 4: 他に好きな人ができた, 5: 自然消滅, 6: その他'
+                allowShare:
+                  type: boolean
+            examples:
+              example-1:
+                value:
+                  reasonId: 1
+                  allowShare: true
         description: Broke Reason
   /me/lovers:
     get:

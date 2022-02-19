@@ -19,3 +19,8 @@ type LovePoint struct {
 type MatchResult struct {
 	MatchSuccess bool `json:"matchSuccess"`
 }
+
+type BrokeReport struct {
+	ReasonID   int  `json:"reasonID"`
+	AllowShare bool `json:"allowShare"`
+}
