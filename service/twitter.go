@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/mrjones/oauth"
+	"net/url"
 	"strconv"
 )
 
@@ -16,6 +17,7 @@ type TwitterService interface {
 	GetFollowees(token *oauth.AccessToken) ([]*model.TwitterUser, error)
 	GetFollowers(token *oauth.AccessToken) ([]*model.TwitterUser, error)
 	Search(token *oauth.AccessToken, query string) ([]*model.TwitterUser, error)
+	SendTweet(token *oauth.AccessToken, content string) error
 	SendDirectMessage(token *oauth.AccessToken, toUserID int64, content string) error
 }
 
@@ -228,6 +230,20 @@ func (c *twitterServiceImpl) Search(token *oauth.AccessToken, query string) ([]*
 		})
 	}
 	return users, nil
+}
+
+func (c *twitterServiceImpl) SendTweet(token *oauth.AccessToken, content string) error {
+	httpClient, err := c.consumer.MakeHttpClient(token)
+	if err != nil {
+		return err
+	}
+	status := url.QueryEscape(content)
+	_, err = httpClient.Post(
+		twitterAPIEndpoint+"/statuses/update.json?status="+status,
+		"application/json",
+		nil,
+	)
+	return nil
 }
 
 func (c *twitterServiceImpl) SendDirectMessage(token *oauth.AccessToken, toUserID int64, content string) error {
