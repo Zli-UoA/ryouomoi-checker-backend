@@ -13,13 +13,14 @@ type Couple struct {
 	ID        int64
 	User1     *User
 	User2     *User
-	CreatedAt *time.Time
+	CreatedAt time.Time
 	BrokenAt  *time.Time
 }
 
 type BrokeReport struct {
 	ID            int64
-	Couple        Couple
-	User          TwitterUser
-	BrokeReasonID int64 // init.sql参照
+	Couple        *Couple
+	User          *User
+	BrokeReasonID int // init.sql参照
+	AllowShare    bool
 }

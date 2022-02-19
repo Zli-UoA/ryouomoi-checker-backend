@@ -73,6 +73,7 @@ func main() {
 	slpu := usecase.NewSetLovePointUseCase(5, botUserID, ur, bts)
 	gfu := usecase.NewGetFolloweesUseCase(ts, ur)
 	fru := usecase.NewGetFollowersUseCase(ts, ur)
+	dclu := usecase.NewDeleteCurrentLover(botUserID, ur, bts)
 
 	tc := controller.NewTwitterController(frontRedirectUrl, gtluu, htcu)
 	btc := controller.NewTwitterController(
@@ -81,6 +82,7 @@ func main() {
 		usecase.NewHandleTwitterCallbackUseCase(bts, ujs, ur),
 	)
 	fc := controller.NewFriendsController(ujs, fsu, slpu, gfu, fru)
+	mc := controller.NewMeController(ujs, dclu)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -93,6 +95,8 @@ func main() {
 
 	r.GET("/friends/search", fc.FriendsSearch)
 	r.POST("/friends/:id", fc.SetLovePoint)
+
+	r.DELETE("/me/lover", mc.DeleteCurrentLover)
 
 	r.Run(":8080")
 }
