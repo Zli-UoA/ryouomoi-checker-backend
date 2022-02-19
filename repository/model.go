@@ -24,7 +24,7 @@ type Couple struct {
 	User1     TwitterUser `db:"user1"`
 	User2     TwitterUser `db:"user2"`
 	CreatedAt time.Time   `db:"created_at"`
-	BrokenAt  time.Time   `db:"broken_at"`
+	BrokenAt  *time.Time  `db:"broken_at"`
 }
 
 type ChatRoom struct {

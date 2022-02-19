@@ -13,6 +13,7 @@ type UserRepository interface {
 	CreateUser(user *model.User) (*model.User, error)
 	UpdateUser(user *model.User) (*model.User, error)
 	GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error)
+	DeleteLovePoint(userID, loverUserID int64) error
 	GetLovePoints(userID int64) ([]*model.UserLovePoint, error)
 	SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error)
 	GetCurrentCouple(userID int64) (*model.Couple, error)
@@ -54,8 +55,8 @@ func convertToCouple(couple *Couple) *model.Couple {
 		ID:        couple.ID,
 		User1:     convertToUser(&couple.User1),
 		User2:     convertToUser(&couple.User2),
-		CreatedAt: &couple.CreatedAt,
-		BrokenAt:  &couple.BrokenAt,
+		CreatedAt: couple.CreatedAt,
+		BrokenAt:  couple.BrokenAt,
 	}
 	return &cp
 }
@@ -80,6 +81,11 @@ func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.Use
 		return nil, err
 	}
 	return convertToUserLovePoint(&userLovePoint), nil
+}
+
+func (u *userRepositoryImpl) DeleteLovePoint(userID, loverUserID int64) error {
+	_, err := u.db.Exec("DELETE FROM user_love_points WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
+	return err
 }
 
 func (u *userRepositoryImpl) GetLovePoints(userID int64) ([]*model.UserLovePoint, error) {
@@ -124,12 +130,12 @@ func (u *userRepositoryImpl) UpdateCouple(couple *model.Couple) (*model.Couple, 
 func (u *userRepositoryImpl) CreateCouple(couple *model.Couple) (*model.Couple, error) { //test done
 	userID1 := couple.User1.ID
 	userID2 := couple.User2.ID
-	time_now := time.Now()
-	_, err := u.db.Exec("INSERT INTO couples (user_id_1,user_id_2,created_at) VALUES (?,?,?)", userID1, userID2, time_now)
+	timeNow := time.Now()
+	_, err := u.db.Exec("INSERT INTO couples (user_id_1,user_id_2,created_at) VALUES (?,?,?)", userID1, userID2, timeNow)
 	if err != nil {
 		return nil, err
 	}
-	couple.CreatedAt = &time_now
+	couple.CreatedAt = timeNow
 	return couple, nil
 }
 

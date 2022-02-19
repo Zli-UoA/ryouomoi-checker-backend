@@ -13,7 +13,7 @@ type Couple struct {
 	ID        int64
 	User1     *User
 	User2     *User
-	CreatedAt *time.Time
+	CreatedAt time.Time
 	BrokenAt  *time.Time
 }
 
