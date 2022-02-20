@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
@@ -143,7 +142,7 @@ func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.Use
 	return convertToUserLovePoint(&userLovePoint), nil
 }
 
-func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //未テスト TwitterUserのとこどうしよう
+func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //test done 後で綺麗にする
 	cp := Couple{}
 	user_id := Users_id{}
 	User_1 := TwitterUser{}
@@ -154,25 +153,37 @@ func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple,
 	}
 	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_1)
 	if err != nil {
-		panic(err)
+		return nil,err
 	}
 	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_2)
 	if err != nil {
-		panic(err)
+		return nil,err
 	}
 	cp.User1 = &User_1
 	cp.User2 = &User_2
-	fmt.Printf("%v", cp)
 	return convertToCouple(&cp), nil
 }
 
-func (u *userRepositoryImpl) GetCurrentCouple(userID int64) (*model.Couple, error) { //未テスト 今のlover
+func (u *userRepositoryImpl) GetCurrentCouple(userID int64) (*model.Couple, error) { //test done 汚いので後で修正
 	//一件もなかったらnil
 	cp := Couple{}
-	err := u.db.Get(&cp, "SELECT * FROM couples WHERE broken_at IS NULL AND (user_id_1 = ? OR user_id_2 = ?);", userID, userID) //sqlはオッケー
+	user_id := Users_id{}
+	User_1 := TwitterUser{}
+	User_2 := TwitterUser{}
+	err := u.db.QueryRow("SELECT user_id_1,user_id_2 FROM couples WHERE broken_at IS NULL AND (user_id_1 = ? OR user_id_2 = ?);", userID, userID).Scan(&user_id.user_id_1, &user_id.user_id_2)
 	if err != nil {
 		return nil, err
 	}
+	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_1)
+	if err != nil {
+		return nil, err
+	}
+	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_2)
+	if err != nil {
+		return nil, err
+	}
+	cp.User1 = &User_1
+	cp.User2 = &User_2
 	return convertToCouple(&cp), err
 }
 
