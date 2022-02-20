@@ -7,8 +7,35 @@ import (
 )
 
 type MeController struct {
-	ujs  service.UserJWTService
-	dclu usecase.DeleteCurrentLoverUseCase
+	ujs    service.UserJWTService
+	glptsu usecase.GetLovePointsUseCase
+	dclu   usecase.DeleteCurrentLoverUseCase
+}
+
+func (m *MeController) GetLovePoints(c *gin.Context) {
+	token, err := GetAuthToken(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	userID, err := m.ujs.GetUserIDFromJWT(token)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	lovePoints, err := m.glptsu.Execute(userID)
+	res := make([]*UserLovePoint, len(lovePoints))
+	for i, point := range lovePoints {
+		res[i] = &UserLovePoint{
+			LoverUser: convertToJson(point.LoverUser),
+			LovePoint: point.LovePoint,
+		}
+	}
+	c.JSON(200, res)
 }
 
 func (m *MeController) DeleteCurrentLover(c *gin.Context) {
@@ -43,9 +70,10 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 	c.Status(200)
 }
 
-func NewMeController(ujs service.UserJWTService, dclu usecase.DeleteCurrentLoverUseCase) *MeController {
+func NewMeController(ujs service.UserJWTService, glptsu usecase.GetLovePointsUseCase, dclu usecase.DeleteCurrentLoverUseCase) *MeController {
 	return &MeController{
-		ujs:  ujs,
-		dclu: dclu,
+		ujs:    ujs,
+		glptsu: glptsu,
+		dclu:   dclu,
 	}
 }
