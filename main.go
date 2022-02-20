@@ -87,7 +87,11 @@ func main() {
 	mc := controller.NewMeController(ujs, glpu, glptsu, dclu)
 
 	r := gin.Default()
-	r.Use(cors.Default())
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, "Authorization", "Accept")
+	corsConfig.ExposeHeaders = []string{"Link"}
+	r.Use(cors.New(corsConfig))
 
 	r.GET("/twitter/login", tc.GetTwitterLoginUrl)
 	r.GET("/twitter/callback", tc.HandleTwitterCallback)
