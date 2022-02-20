@@ -153,11 +153,11 @@ func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple,
 	}
 	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_1)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_2)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	cp.User1 = &User_1
 	cp.User2 = &User_2
@@ -214,12 +214,17 @@ func (u *userRepositoryImpl) UpdateUser(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
-func (u *userRepositoryImpl) CreateBrokeReport(report *model.BrokeReport) (*model.BrokeReport, error) {
-	panic("implement me")
+func (u *userRepositoryImpl) CreateBrokeReport(report *model.BrokeReport) (*model.BrokeReport, error) { //test done
+	_, err := u.db.Exec("INSERT INTO couple_broke_reports (couple_id,user_id, broke_reason_id, allow_share) VALUES (?,?, ?,?)", report.Couple.ID, report.User.ID, report.BrokeReasonID, report.AllowShare)
+	if err != nil {
+		return nil, err
+	}
+	return report, nil
+
 }
 
 func (u *userRepositoryImpl) GetBrokeReport(userID, coupleID int64) (*model.BrokeReport, error) {
-	panic("implement me")
+
 }
 
 func NewUserRepository(db *sqlx.DB) UserRepository {
