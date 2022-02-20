@@ -89,6 +89,7 @@ func main() {
 	r := gin.Default()
 
 	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"https://*", "http://*"}
 	corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, "Authorization", "Accept")
 	corsConfig.ExposeHeaders = []string{"Link"}
 	r.Use(cors.New(corsConfig))
