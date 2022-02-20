@@ -96,6 +96,8 @@ func main() {
 	r.GET("/bot/callback", btc.HandleTwitterCallback)
 
 	r.GET("/friends/search", fc.FriendsSearch)
+	r.GET("/friends/follower", fc.GetFollowers)
+	r.GET("/friends/followee", fc.GetFollowees)
 	r.POST("/friends/:id", fc.SetLovePoint)
 
 	r.GET("/me/lovers", mc.GetLovePoints)
