@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
@@ -25,6 +26,10 @@ type UserRepository interface {
 
 type userRepositoryImpl struct {
 	db *sqlx.DB
+}
+type Users_id struct {
+	user_id_1 int64 `db:"user_id_1"`
+	user_id_2 int64 `db:"user_id_2"`
 }
 
 //dbとアプリ内のuserの変換
@@ -72,15 +77,6 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 		AccessTokenSecret: user.TwitterAccessToken.Secret,
 	}
 	return &twitterUser
-}
-
-func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) { // test done
-	userLovePoint := UserLovePoint{}
-	err := u.db.Get(&userLovePoint, "SELECT u.id id, t.twitter_id \"user.twitter_id\", t.screen_name \"user.screen_name\", t.display_name \"user.display_name\", t.profile_image_url \"user.profile_image_url\", t.biography \"user.biography\", u.lover_user_id lover_user_id, u.love_point love_point FROM user_love_points u JOIN twitter_users t ON t.twitter_id = u.user_id WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
-	if err != nil {
-		return nil, err
-	}
-	return convertToUserLovePoint(&userLovePoint), nil
 }
 
 func (u *userRepositoryImpl) DeleteLovePoint(userID, loverUserID int64) error {
@@ -138,13 +134,35 @@ func (u *userRepositoryImpl) CreateCouple(couple *model.Couple) (*model.Couple, 
 	couple.CreatedAt = timeNow
 	return couple, nil
 }
-
-func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //未テスト TwitterUserのとこどうしよう
-	cp := Couple{} //user1でいい?user2の可能性もありそう
-	err := u.db.Get(&cp, "SELECT * FROM couples WHERE user_id_1 = ? OR user_id_2 = ? ORDER BY broken_at DESC LIMIT 1", userID, userID)
+func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.UserLovePoint, error) { // test done
+	userLovePoint := UserLovePoint{}
+	err := u.db.Get(&userLovePoint, "SELECT u.id id, t.twitter_id \"user.twitter_id\", t.screen_name \"user.screen_name\", t.display_name \"user.display_name\", t.profile_image_url \"user.profile_image_url\", t.biography \"user.biography\", u.lover_user_id lover_user_id, u.love_point love_point FROM user_love_points u JOIN twitter_users t ON t.twitter_id = u.user_id WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
 	if err != nil {
 		return nil, err
 	}
+	return convertToUserLovePoint(&userLovePoint), nil
+}
+
+func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //未テスト TwitterUserのとこどうしよう
+	cp := Couple{}
+	user_id := Users_id{}
+	User_1 := TwitterUser{}
+	User_2 := TwitterUser{}
+	err := u.db.QueryRow("select id,user_id_1 ,user_id_2,created_at,broken_at from twitter_users join couples on twitter_users.twitter_id = couples.user_id_1 WHERE couples.user_id_1 = ? OR couples.user_id_2 = ? ORDER BY broken_at DESC LIMIT 1", 1, 1).Scan(&cp.ID, &user_id.user_id_1, &user_id.user_id_2, &cp.CreatedAt, &cp.BrokenAt)
+	if err != nil {
+		panic(err)
+	}
+	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_1)
+	if err != nil {
+		panic(err)
+	}
+	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_2)
+	if err != nil {
+		panic(err)
+	}
+	cp.User1 = &User_1
+	cp.User2 = &User_2
+	fmt.Printf("%v", cp)
 	return convertToCouple(&cp), nil
 }
 
