@@ -6,14 +6,14 @@ import (
 )
 
 type GetLovePointUsecase interface {
-	Execute(userID, loverUserID int64)(*model.UserLovePoint, error)
+	Execute(userID, loverUserID int64) (*model.UserLovePoint, error)
 }
 
 type getLovePointUseCaseImpl struct {
 	ur repository.UserRepository
 }
 
-func (g *getLovePointUseCaseImpl) Execute(userID, loverID int64)(*model.UserLovePoint, error) {
+func (g *getLovePointUseCaseImpl) Execute(userID, loverID int64) (*model.UserLovePoint, error) {
 	lover, err := g.ur.GetLovePoint(userID, loverID)
 	if err != nil {
 		return nil, err
@@ -21,8 +21,8 @@ func (g *getLovePointUseCaseImpl) Execute(userID, loverID int64)(*model.UserLove
 	return lover, nil
 }
 
-func NewGetLovePointUsecase(ur repository.UserRepository) GetLovePointUsecase{
+func NewGetLovePointUsecase(ur repository.UserRepository) GetLovePointUsecase {
 	return &getLovePointUseCaseImpl{
-	ur: ur,
+		ur: ur,
 	}
 }
