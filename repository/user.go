@@ -26,9 +26,18 @@ type UserRepository interface {
 type userRepositoryImpl struct {
 	db *sqlx.DB
 }
+//↓User構築用
 type Users_id struct {
 	user_id_1 int64 `db:"user_id_1"`
 	user_id_2 int64 `db:"user_id_2"`
+}
+//↓dbから値を抜く時だけ使う
+type brokeReport struct {
+	id              int64
+	couple_id       int64
+	user_id         int64
+	broke_reason_id int
+	allow_share     bool
 }
 
 //dbとアプリ内のuserの変換
@@ -77,7 +86,17 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 	}
 	return &twitterUser
 }
-
+func (u *userRepositoryImpl) GenerateTwitterUserFromUserID(userID int64) (*TwitterUser, error) {
+	User := TwitterUser{}
+	err := u.db.Get(&User, "SELECT * FROM twitter_users WHERE twitter_id=?", userID)
+	if err != nil {
+		return nil, err
+	}
+	return &User, nil
+}
+func NewUserRepository(db *sqlx.DB) UserRepository {
+	return &userRepositoryImpl{db: db}
+}
 func (u *userRepositoryImpl) DeleteLovePoint(userID, loverUserID int64) error {
 	_, err := u.db.Exec("DELETE FROM user_love_points WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
 	return err
@@ -144,18 +163,18 @@ func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.Use
 
 func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //test done 後で綺麗にする
 	cp := Couple{}
-	user_id := Users_id{}
+	users_id := Users_id{}
 	User_1 := TwitterUser{}
 	User_2 := TwitterUser{}
-	err := u.db.QueryRow("select id,user_id_1 ,user_id_2,created_at,broken_at from twitter_users join couples on twitter_users.twitter_id = couples.user_id_1 WHERE couples.user_id_1 = ? OR couples.user_id_2 = ? ORDER BY broken_at DESC LIMIT 1", 1, 1).Scan(&cp.ID, &user_id.user_id_1, &user_id.user_id_2, &cp.CreatedAt, &cp.BrokenAt)
+	err := u.db.QueryRow("select id,user_id_1 ,user_id_2,created_at,broken_at from twitter_users join couples on twitter_users.twitter_id = couples.user_id_1 WHERE couples.user_id_1 = ? OR couples.user_id_2 = ? ORDER BY broken_at DESC LIMIT 1", 1, 1).Scan(&cp.ID, &users_id.user_id_1, &users_id.user_id_2, &cp.CreatedAt, &cp.BrokenAt)
 	if err != nil {
 		panic(err)
 	}
-	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_1)
+	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", users_id.user_id_1)
 	if err != nil {
 		return nil, err
 	}
-	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_2)
+	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", users_id.user_id_2)
 	if err != nil {
 		return nil, err
 	}
@@ -222,11 +241,43 @@ func (u *userRepositoryImpl) CreateBrokeReport(report *model.BrokeReport) (*mode
 	return report, nil
 
 }
-
-func (u *userRepositoryImpl) GetBrokeReport(userID, coupleID int64) (*model.BrokeReport, error) {
-
+func (u *userRepositoryImpl) GenerateCoupleFromCoupleID(coupleID int64) (*Couple, error) {
+	cp := Couple{}
+	users_id := Users_id{}
+	User_1 := TwitterUser{}
+	User_2 := TwitterUser{}
+	err := u.db.QueryRow("SELECT * FROM couples WHERE id=?", coupleID).Scan(&cp.ID, &users_id.user_id_1, &users_id.user_id_2, &cp.CreatedAt, &cp.BrokenAt)
+	if err != nil {
+		return nil, err
+	}
+	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", users_id.user_id_1)
+	if err != nil {
+		return nil, err
+	}
+	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", users_id.user_id_2)
+	if err != nil {
+		return nil, err
+	}
+	cp.User1 = &User_1
+	cp.User2 = &User_2
+	return &cp, nil
 }
-
-func NewUserRepository(db *sqlx.DB) UserRepository {
-	return &userRepositoryImpl{db: db}
+func (u *userRepositoryImpl) GetBrokeReport(userID, coupleID int64) (*model.BrokeReport, error) { //test done?
+	repo := brokeReport{}
+	err := u.db.QueryRow("select * from couple_broke_reports where user_id = ? and couple_id = ?", userID, coupleID).Scan(&repo.id, &repo.couple_id, &repo.user_id, &repo.broke_reason_id, &repo.allow_share)
+	if err != nil {
+		return nil, err
+	}
+	res_repo := model.BrokeReport{}
+	res_repo.ID = repo.id
+	res_repo.BrokeReasonID = repo.broke_reason_id
+	res_repo.AllowShare = repo.allow_share
+	cp, err := u.GenerateCoupleFromCoupleID(repo.couple_id)
+	if err != nil {
+		return nil, err
+	}
+	res_repo.Couple = convertToCouple(cp)
+	user, err := u.GenerateTwitterUserFromUserID(userID)
+	res_repo.User = convertToUser(user)
+	return &res_repo, nil
 }
