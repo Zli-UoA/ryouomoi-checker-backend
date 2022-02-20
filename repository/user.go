@@ -88,6 +88,7 @@ func convertToTwitterUser(user *model.User) *TwitterUser {
 	}
 	return &twitterUser
 }
+
 func (u *userRepositoryImpl) generateTwitterUserFromUserID(userID int64) (*TwitterUser, error) {
 	User := TwitterUser{}
 	err := u.db.Get(&User, "SELECT * FROM twitter_users WHERE twitter_id=?", userID)
@@ -96,6 +97,7 @@ func (u *userRepositoryImpl) generateTwitterUserFromUserID(userID int64) (*Twitt
 	}
 	return &User, nil
 }
+
 func (u *userRepositoryImpl) generateCoupleFromCoupleID(coupleID int64) (*Couple, error) { //文字通り
 	cp := Couple{}
 	users_id := Users_id{}
@@ -117,9 +119,7 @@ func (u *userRepositoryImpl) generateCoupleFromCoupleID(coupleID int64) (*Couple
 	cp.User2 = &User_2
 	return &cp, nil
 }
-func NewUserRepository(db *sqlx.DB) UserRepository {
-	return &userRepositoryImpl{db: db}
-}
+
 func (u *userRepositoryImpl) DeleteLovePoint(userID, loverUserID int64) error {
 	_, err := u.db.Exec("DELETE FROM user_love_points WHERE user_id = ? AND lover_user_id = ?", userID, loverUserID)
 	return err
@@ -264,6 +264,7 @@ func (u *userRepositoryImpl) CreateBrokeReport(report *model.BrokeReport) (*mode
 	return report, nil
 
 }
+
 func (u *userRepositoryImpl) GetBrokeReport(userID, coupleID int64) (*model.BrokeReport, error) { //test done?
 	repo := brokeReport{}
 	err := u.db.QueryRow("select * from couple_broke_reports where user_id = ? and couple_id = ?", userID, coupleID).Scan(&repo.id, &repo.couple_id, &repo.user_id, &repo.broke_reason_id, &repo.allow_share)
@@ -282,4 +283,8 @@ func (u *userRepositoryImpl) GetBrokeReport(userID, coupleID int64) (*model.Brok
 	user, err := u.generateTwitterUserFromUserID(userID)
 	res_repo.User = convertToUser(user)
 	return &res_repo, nil
+}
+
+func NewUserRepository(db *sqlx.DB) UserRepository {
+	return &userRepositoryImpl{db: db}
 }
