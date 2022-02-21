@@ -16,11 +16,16 @@ type LovePoint struct {
 	LovePoint int `json:"lovePoint"`
 }
 
+type UserLovePoint struct {
+	LoverUser *TwitterUser `json:"user"`
+	LovePoint int          `json:"lovePoint"`
+}
+
 type MatchResult struct {
 	MatchSuccess bool `json:"matchSuccess"`
 }
 
 type BrokeReport struct {
-	ReasonID   int  `json:"reasonID"`
+	ReasonID   int  `json:"reasonId"`
 	AllowShare bool `json:"allowShare"`
 }

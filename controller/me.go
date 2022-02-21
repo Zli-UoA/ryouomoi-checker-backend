@@ -4,17 +4,45 @@ import (
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/usecase"
 	"github.com/gin-gonic/gin"
+	"log"
 	"strconv"
 )
 
 type MeController struct {
-	ujs  service.UserJWTService
-	glpu usecase.GetLovePointUsecase
+	ujs    service.UserJWTService
+	glpu   usecase.GetLovePointUsecase
+	glptsu usecase.GetLovePointsUseCase
 	gclu usecase.GetCurrentLoverUsecase
-	dclu usecase.DeleteCurrentLoverUseCase
+	dclu   usecase.DeleteCurrentLoverUseCase
 }
 
-func (m *MeController)GetLovePoint(c *gin.Context) {
+func (m *MeController) GetLovePoints(c *gin.Context) {
+	token, err := GetAuthToken(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	userID, err := m.ujs.GetUserIDFromJWT(token)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	lovePoints, err := m.glptsu.Execute(userID)
+	res := make([]*UserLovePoint, len(lovePoints))
+	for i, point := range lovePoints {
+		res[i] = &UserLovePoint{
+			LoverUser: convertToJson(point.LoverUser),
+			LovePoint: point.LovePoint,
+		}
+	}
+	c.JSON(200, res)
+}
+
+func (m *MeController) GetLovePoint(c *gin.Context) {
 	token, err := GetAuthToken(c)
 	if err != nil {
 		c.JSON(401, gin.H{
@@ -70,6 +98,12 @@ func (m *MeController)GetCurrentLover(c *gin.Context) {
 		})
 		return
 	}
+	if currentLover == nil {
+		c.JSON(404, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
 	jsonLover := &TwitterUser{
 		ID: currentLover.ID,
 		ScreenName: currentLover.ScreenName,
@@ -112,11 +146,13 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 	c.Status(200)
 }
 
-func NewMeController(ujs service.UserJWTService, glpu usecase.GetLovePointUsecase, gclu usecase.GetCurrentLoverUsecase, dclu usecase.DeleteCurrentLoverUseCase) *MeController {
+
+func NewMeController(ujs service.UserJWTService, glpu usecase.GetLovePointUsecase, glptsu usecase.GetLovePointsUseCase, gclu usecase.GetCurrentLoverUsecase, dclu usecase.DeleteCurrentLoverUseCase) *MeController {
 	return &MeController{
-		ujs:  ujs,
-		glpu: glpu,
+		ujs:    ujs,
+		glpu:   glpu,
+		glptsu: glptsu,
 		gclu: gclu,
-		dclu: dclu,
+		dclu:   dclu,
 	}
 }

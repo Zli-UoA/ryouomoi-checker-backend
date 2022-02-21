@@ -73,6 +73,9 @@ func main() {
 	slpu := usecase.NewSetLovePointUseCase(5, botUserID, ur, bts)
 	gfu := usecase.NewGetFolloweesUseCase(ts, ur)
 	fru := usecase.NewGetFollowersUseCase(ts, ur)
+	glpu := usecase.NewGetLovePointUsecase(ur)
+	glptsu := usecase.NewGetLovePointsUseCase(ur, ts)
+	gclu := usecase.NewGetCurrentLover(ur)
 	dclu := usecase.NewDeleteCurrentLover(botUserID, ur, bts)
 
 	tc := controller.NewTwitterController(frontRedirectUrl, gtluu, htcu)
@@ -82,10 +85,15 @@ func main() {
 		usecase.NewHandleTwitterCallbackUseCase(bts, ujs, ur),
 	)
 	fc := controller.NewFriendsController(ujs, fsu, slpu, gfu, fru)
-	mc := controller.NewMeController(ujs, dclu)
+	mc := controller.NewMeController(ujs, glpu, glptsu, gclu, dclu)
 
 	r := gin.Default()
-	r.Use(cors.Default())
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AddAllowHeaders("Authorization", "Accept")
+	corsConfig.AllowOrigins = []string{"*"}
+	corsConfig.ExposeHeaders = []string{"Link"}
+	r.Use(cors.New(corsConfig))
 
 	r.GET("/twitter/login", tc.GetTwitterLoginUrl)
 	r.GET("/twitter/callback", tc.HandleTwitterCallback)
@@ -94,8 +102,13 @@ func main() {
 	r.GET("/bot/callback", btc.HandleTwitterCallback)
 
 	r.GET("/friends/search", fc.FriendsSearch)
+	r.GET("/friends/follower", fc.GetFollowers)
+	r.GET("/friends/followee", fc.GetFollowees)
 	r.POST("/friends/:id", fc.SetLovePoint)
 
+	r.GET("/me/lovers", mc.GetLovePoints)
+	r.GET("/me/lovers/:id", mc.GetLovePoint)
+	r.GET("me/lover", mc.GetCurrentLover)
 	r.DELETE("/me/lover", mc.DeleteCurrentLover)
 
 	r.Run(":8080")

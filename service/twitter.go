@@ -8,6 +8,7 @@ import (
 	"github.com/mrjones/oauth"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type TwitterService interface {
@@ -17,6 +18,8 @@ type TwitterService interface {
 	GetFollowees(token *oauth.AccessToken) ([]*model.TwitterUser, error)
 	GetFollowers(token *oauth.AccessToken) ([]*model.TwitterUser, error)
 	Search(token *oauth.AccessToken, query string) ([]*model.TwitterUser, error)
+	Lookup(token *oauth.AccessToken, ids []int64) ([]*model.TwitterUser, error)
+	Show(token *oauth.AccessToken, id int64) (*model.TwitterUser, error)
 	SendTweet(token *oauth.AccessToken, content string) error
 	SendDirectMessage(token *oauth.AccessToken, toUserID int64, content string) error
 }
@@ -230,6 +233,78 @@ func (c *twitterServiceImpl) Search(token *oauth.AccessToken, query string) ([]*
 		})
 	}
 	return users, nil
+}
+
+func (c *twitterServiceImpl) Lookup(token *oauth.AccessToken, ids []int64) ([]*model.TwitterUser, error) {
+	httpClient, err := c.consumer.MakeHttpClient(token)
+	if err != nil {
+		return nil, err
+	}
+	var urlBuilder strings.Builder
+	urlBuilder.WriteString(twitterAPIEndpoint + "/users/lookup.json?user_id=")
+	for i, id := range ids {
+		urlBuilder.WriteString(strconv.FormatInt(id, 10))
+		if i < len(ids)-1 {
+			urlBuilder.WriteString(",")
+		}
+	}
+	res, err := httpClient.Get(urlBuilder.String())
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, errors.New("twitter api response error")
+	}
+	usersObj := &[]userObject{}
+	err = json.NewDecoder(res.Body).Decode(usersObj)
+	res.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	var users []*model.TwitterUser
+
+	for _, userObj := range *usersObj {
+		users = append(users, &model.TwitterUser{
+			ID:              userObj.ID,
+			DisplayName:     userObj.Name,
+			ScreenName:      userObj.ScreenName,
+			ProfileImageUrl: userObj.ProfileImageURL,
+			Biography:       userObj.Description,
+		})
+	}
+	return users, nil
+}
+
+func (c *twitterServiceImpl) Show(token *oauth.AccessToken, id int64) (*model.TwitterUser, error) {
+	httpClient, err := c.consumer.MakeHttpClient(token)
+	if err != nil {
+		return nil, err
+	}
+	res, err := httpClient.Get(twitterAPIEndpoint + "/users/show.json?user_id=" + strconv.FormatInt(id, 10))
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return nil, errors.New("twitter api response error")
+	}
+
+	userObj := &userObject{}
+	err = json.NewDecoder(res.Body).Decode(userObj)
+	if err != nil {
+		return nil, err
+	}
+
+	user := &model.TwitterUser{
+		ID:              userObj.ID,
+		DisplayName:     userObj.Name,
+		ScreenName:      userObj.ScreenName,
+		ProfileImageUrl: userObj.ProfileImageURL,
+		Biography:       userObj.Description,
+	}
+	return user, nil
 }
 
 func (c *twitterServiceImpl) SendTweet(token *oauth.AccessToken, content string) error {
