@@ -4,7 +4,6 @@ import (
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/usecase"
 	"github.com/gin-gonic/gin"
-	"log"
 	"strconv"
 )
 
