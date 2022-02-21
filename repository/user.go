@@ -17,6 +17,7 @@ type UserRepository interface {
 	GetLovePoints(userID int64) ([]*model.UserLovePoint, error)
 	SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error)
 	GetCurrentCouple(userID int64) (*model.Couple, error)
+	GetLatestBrokenCouple(userID int64) (*model.Couple, error)
 	CreateCouple(couple *model.Couple) (*model.Couple, error)
 	UpdateCouple(couple *model.Couple) (*model.Couple, error)
 	CreateBrokeReport(report *model.BrokeReport) (*model.BrokeReport, error)
