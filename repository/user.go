@@ -187,47 +187,37 @@ func (u *userRepositoryImpl) GetLovePoint(userID, loverUserID int64) (*model.Use
 
 func (u *userRepositoryImpl) GetLatestBrokenCouple(userID int64) (*model.Couple, error) { //test done 後で綺麗にする
 	cp := Couple{}
-	users_id := Users_id{}
-	User_1 := TwitterUser{}
-	User_2 := TwitterUser{}
-	err := u.db.QueryRow("select id,user_id_1 ,user_id_2,created_at,broken_at from twitter_users join couples on twitter_users.twitter_id = couples.user_id_1 WHERE couples.user_id_1 = ? OR couples.user_id_2 = ? ORDER BY broken_at DESC LIMIT 1", 1, 1).Scan(&cp.ID, &users_id.user_id_1, &users_id.user_id_2, &cp.CreatedAt, &cp.BrokenAt)
-	if err != nil {
-		panic(err)
-	}
-	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", users_id.user_id_1)
-	if err != nil {
-		return nil, err
-	}
-	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", users_id.user_id_2)
+	sql := `SELECT c.id, 
+u1.twitter_id "user1.twitter_id", u1.screen_name "user1.screen_name", u1.display_name "user1.display_name", u1.profile_image_url "user1.profile_image_url", u1.biography "user1.biography", u1.access_token "user1.access_token", u1.access_token_secret "user1.access_token_secret",
+u2.twitter_id "user2.twitter_id", u2.screen_name "user2.screen_name", u2.display_name "user2.display_name", u2.profile_image_url "user2.profile_image_url", u2.biography "user2.biography", u2.access_token "user2.access_token", u2.access_token_secret "user2.access_token_secret",
+c.created_at, c.broken_at
+FROM couples c
+JOIN twitter_users u1 ON c.user_id_1 = u1.twitter_id
+JOIN twitter_users u2 ON c.user_id_2 = u2.twitter_id
+WHERE c.broken_at IS NOT NULL AND (c.user_id_1 = ? OR c.user_id_2 = ?) ORDER BY c.broken_at DESC`
+	err := u.db.Get(&cp, sql, userID, userID)
 	if err != nil {
 		return nil, err
 	}
-	cp.User1 = &User_1
-	cp.User2 = &User_2
 	return convertToCouple(&cp), nil
 }
 
 func (u *userRepositoryImpl) GetCurrentCouple(userID int64) (*model.Couple, error) { //test done 汚いので後で修正
 	//一件もなかったらnil
 	cp := Couple{}
-	user_id := Users_id{}
-	User_1 := TwitterUser{}
-	User_2 := TwitterUser{}
-	err := u.db.QueryRow("SELECT user_id_1,user_id_2 FROM couples WHERE broken_at IS NULL AND (user_id_1 = ? OR user_id_2 = ?);", userID, userID).Scan(&user_id.user_id_1, &user_id.user_id_2)
+	sql := `SELECT c.id, 
+u1.twitter_id "user1.twitter_id", u1.screen_name "user1.screen_name", u1.display_name "user1.display_name", u1.profile_image_url "user1.profile_image_url", u1.biography "user1.biography", u1.access_token "user1.access_token", u1.access_token_secret "user1.access_token_secret",
+u2.twitter_id "user2.twitter_id", u2.screen_name "user2.screen_name", u2.display_name "user2.display_name", u2.profile_image_url "user2.profile_image_url", u2.biography "user2.biography", u2.access_token "user2.access_token", u2.access_token_secret "user2.access_token_secret",
+c.created_at, c.broken_at
+FROM couples c
+JOIN twitter_users u1 ON c.user_id_1 = u1.twitter_id
+JOIN twitter_users u2 ON c.user_id_2 = u2.twitter_id
+WHERE c.broken_at IS NULL AND (c.user_id_1 = ? OR c.user_id_2 = ?)`
+	err := u.db.Get(&cp, sql, userID, userID)
 	if err != nil {
 		return nil, err
 	}
-	err = u.db.Get(&User_1, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_1)
-	if err != nil {
-		return nil, err
-	}
-	err = u.db.Get(&User_2, "SELECT * FROM twitter_users WHERE twitter_id=?", user_id.user_id_2)
-	if err != nil {
-		return nil, err
-	}
-	cp.User1 = &User_1
-	cp.User2 = &User_2
-	return convertToCouple(&cp), err
+	return convertToCouple(&cp), nil
 }
 
 func (u *userRepositoryImpl) GetUser(id int64) (*model.User, error) { //未テスト そのまま(?のとこだけ変えた)
