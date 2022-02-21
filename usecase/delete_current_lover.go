@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/repository"
@@ -74,12 +76,13 @@ func (d *deleteCurrentLoverUseCaseImpl) BreakFirst(userID int64, couple *model.C
 	return nil
 }
 
+var ErrorBrokeReportAlreadyExists = errors.New("user broke report already exists")
+
 // あとに破局手続きをするほう
-func (d *deleteCurrentLoverUseCaseImpl) BreakSecond(userID int64, brokeReason int, allowShare bool) error {
-	couple, err := d.ur.GetLatestBrokenCouple(userID)
-	if err != nil {
-		log.Println("latest broken couple is nil")
-		return err
+func (d *deleteCurrentLoverUseCaseImpl) BreakSecond(userID int64, couple *model.Couple, brokeReason int, allowShare bool) error {
+	_, err := d.ur.GetBrokeReport(userID, couple.ID)
+	if err == nil {
+		return ErrorBrokeReportAlreadyExists
 	}
 	var user *model.User
 	var lover *model.User
@@ -125,12 +128,18 @@ func (d *deleteCurrentLoverUseCaseImpl) BreakSecond(userID int64, brokeReason in
 
 func (d *deleteCurrentLoverUseCaseImpl) Execute(userID int64, brokeReason int, allowShare bool) error {
 	couple, err := d.ur.GetCurrentCouple(userID)
-	if couple != nil {
-		err = nil
+	if err == nil {
 		err = d.BreakFirst(userID, couple, brokeReason, allowShare)
 	} else {
-		err = nil
-		err = d.BreakSecond(userID, brokeReason, allowShare)
+		couple, err = d.ur.GetLatestBrokenCouple(userID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return fmt.Errorf("latest broken couple is nil. %w", err)
+			} else {
+				return err
+			}
+		}
+		err = d.BreakSecond(userID, couple, brokeReason, allowShare)
 	}
 	if err != nil {
 		return err
