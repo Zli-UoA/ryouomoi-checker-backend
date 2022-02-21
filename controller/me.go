@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/usecase"
 	"github.com/gin-gonic/gin"
@@ -98,10 +100,16 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 	}
 	err = m.dclu.Execute(userID, req.ReasonID, req.AllowShare)
 	if err != nil {
-		c.JSON(500, gin.H{
-			"message": err.Error(),
-		})
-		return
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, usecase.ErrorBrokeReportAlreadyExists) {
+			c.JSON(404, gin.H{
+				"message": err.Error(),
+			})
+		} else {
+			c.JSON(500, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
 	}
 	c.Status(200)
 }
