@@ -77,7 +77,7 @@ func (m *MeController) GetLovePoint(c *gin.Context) {
 	c.JSON(200, jsonLP)
 }
 
-func (m *MeController) GetCurrentLover (c *gin.Context) {
+func (m *MeController) GetCurrentLover(c *gin.Context) {
 	token, err := GetAuthToken(c)
 	if err != nil {
 		c.JSON(401, gin.H{

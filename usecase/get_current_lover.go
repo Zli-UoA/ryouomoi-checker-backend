@@ -8,7 +8,7 @@ import (
 
 type GetCurrentLoverUsecase interface {
 	CheckBreakFirst(userID int64) (*model.BrokeReport, error)
-	Execute(userID int64)(*model.TwitterUser, error)
+	Execute(userID int64) (*model.TwitterUser, error)
 }
 
 type getCurrentLoverUsecaseImpl struct {
@@ -20,7 +20,7 @@ var (
 	BrokenReportError = errors.New("NoRows_BrokenReport")
 )
 
-func (g *getCurrentLoverUsecaseImpl)CheckBreakFirst(userID int64) (*model.BrokeReport, error) {
+func (g *getCurrentLoverUsecaseImpl) CheckBreakFirst(userID int64) (*model.BrokeReport, error) {
 	couple, err := g.ur.GetLatestBrokenCouple(userID)
 	if err != nil {
 		return nil, BrokenCoupleError
@@ -58,4 +58,3 @@ func NewGetCurrentLover(ur repository.UserRepository) GetCurrentLoverUsecase {
 		ur: ur,
 	}
 }
-

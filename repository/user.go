@@ -126,13 +126,6 @@ func (u *userRepositoryImpl) DeleteLovePoint(userID, loverUserID int64) error {
 	return err
 }
 
-type user_love_points struct {
-	id            int64
-	user_id       int64
-	lover_user_id int64
-	love_point    int
-}
-
 func (u *userRepositoryImpl) GetLovePoints(userID int64) ([]*model.UserLovePoint, error) {
 	rows, err := u.db.Query("select * from user_love_points where user_id = ?", userID)
 	if err != nil {
