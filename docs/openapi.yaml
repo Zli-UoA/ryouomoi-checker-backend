@@ -129,10 +129,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                lovePoint:
-                  type: number
+              $ref: '#/components/schemas/LovePoint'
             examples:
               example-1:
                 value:
@@ -149,17 +146,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLovePoint'
+                $ref: '#/components/schemas/TwitterUser'
               examples:
                 example-1:
                   value:
-                    user:
-                      id: 0
-                      screenNme: yt8492
-                      displayName: マヤミト
-                      imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
-                      biography: オタクです
-                    lovePoint: 3
+                    id: 0
+                    screenNme: yt8492
+                    displayName: マヤミト
+                    imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                    biography: オタクです
         '404':
           description: Not Found
       operationId: get-me-lover
@@ -228,16 +223,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLovePoint'
+                $ref: '#/components/schemas/LovePoint'
               examples:
                 example-1:
                   value:
-                    user:
-                      id: 0
-                      screenNme: yt8492
-                      displayName: マヤミト
-                      imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
-                      biography: オタクです
                     lovePoint: 3
       operationId: get-me-lovers
       description: 特定のユーザーに対して現在設定している好き度を取得する
@@ -250,6 +239,18 @@ paths:
         in: path
         required: true
         description: lover user id
+    delete:
+      summary: Delete User Love Point
+      operationId: delete-me-lovers-id
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+      description: 好き度の削除
+      parameters: []
+      security:
+        - dummy_token: []
   /twitter/login:
     get:
       summary: GET Twitter OAuth URL
@@ -331,6 +332,13 @@ components:
         lovePoint:
           type: integer
       x-examples: {}
+    LovePoint:
+      title: LovePoint
+      type: object
+      properties:
+        lovePoint:
+          type: integer
+      description: ''
   securitySchemes:
     dummy_token:
       type: http
