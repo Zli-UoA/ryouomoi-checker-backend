@@ -207,7 +207,8 @@ func (c *twitterServiceImpl) Search(token *oauth.AccessToken, query string) ([]*
 		return nil, err
 	}
 
-	res, err := httpClient.Get(twitterAPIEndpoint + "/users/search.json?count=20&q=" + query)
+	escapedQuery := url.QueryEscape(query)
+	res, err := httpClient.Get(twitterAPIEndpoint + "/users/search.json?count=20&q=" + escapedQuery)
 	if err != nil {
 		return nil, err
 	}
