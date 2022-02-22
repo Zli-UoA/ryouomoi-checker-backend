@@ -126,10 +126,33 @@ func (u *userRepositoryImpl) DeleteLovePoint(userID, loverUserID int64) error {
 	return err
 }
 
-func (u *userRepositoryImpl) GetLovePoints(userID int64) ([]*model.UserLovePoint, error) {
-	panic("implement me")
+type user_love_points struct {
+	id            int64
+	user_id       int64
+	lover_user_id int64
+	love_point    int
 }
 
+func (u *userRepositoryImpl) GetLovePoints(userID int64) ([]*model.UserLovePoint, error) {
+	rows, err := u.db.Query("select * from user_love_points where user_id = ?", userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var res []*model.UserLovePoint
+	for rows.Next() {
+		content := model.UserLovePoint{}
+		if err := rows.Scan(&content.ID, &content.UserID, &content.LoverUserID, &content.LovePoint); err != nil {
+			return nil, err
+		}
+		res = append(res, &content)
+
+	}
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
 func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) { //test done
 	res, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint, point.ID, point.LoverUserID)
 	if err != nil {
