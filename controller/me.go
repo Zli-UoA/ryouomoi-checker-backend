@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/usecase"
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ type MeController struct {
 	ujs    service.UserJWTService
 	glpu   usecase.GetLovePointUsecase
 	glptsu usecase.GetLovePointsUseCase
-	gclu usecase.GetCurrentLoverUsecase
+	gclu   usecase.GetCurrentLoverUsecase
 	dclu   usecase.DeleteCurrentLoverUseCase
 }
 
@@ -75,7 +76,7 @@ func (m *MeController) GetLovePoint(c *gin.Context) {
 	c.JSON(200, jsonLP)
 }
 
-func (m *MeController)GetCurrentLover(c *gin.Context) {
+func (m *MeController) GetCurrentLover(c *gin.Context) {
 	token, err := GetAuthToken(c)
 	if err != nil {
 		c.JSON(401, gin.H{
@@ -92,23 +93,30 @@ func (m *MeController)GetCurrentLover(c *gin.Context) {
 	}
 	currentLover, err := m.gclu.Execute(userID)
 	if err != nil {
-		c.JSON(500, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-	if currentLover == nil {
+		_, err := m.gclu.CheckBreakFirst(userID)
+		if errors.Is(err, usecase.BrokenCoupleError) {
+			c.JSON(500, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+		if errors.Is(err, usecase.BrokenReportError) {
+			c.JSON(410, gin.H{
+				"message": "相手に振られてしまいました。",
+			})
+			return
+		}
 		c.JSON(404, gin.H{
-			"message": err.Error(),
+			"message": "現在、彼氏・彼女はいません。",
 		})
 		return
 	}
 	jsonLover := &TwitterUser{
-		ID: currentLover.ID,
-		ScreenName: currentLover.ScreenName,
+		ID:          currentLover.ID,
+		ScreenName:  currentLover.ScreenName,
 		DisplayName: currentLover.DisplayName,
-		ImageUrl: currentLover.ProfileImageUrl,
-		Biography: currentLover.Biography,
+		ImageUrl:    currentLover.ProfileImageUrl,
+		Biography:   currentLover.Biography,
 	}
 	c.JSON(200, jsonLover)
 }
@@ -145,13 +153,12 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 	c.Status(200)
 }
 
-
 func NewMeController(ujs service.UserJWTService, glpu usecase.GetLovePointUsecase, glptsu usecase.GetLovePointsUseCase, gclu usecase.GetCurrentLoverUsecase, dclu usecase.DeleteCurrentLoverUseCase) *MeController {
 	return &MeController{
 		ujs:    ujs,
 		glpu:   glpu,
 		glptsu: glptsu,
-		gclu: gclu,
+		gclu:   gclu,
 		dclu:   dclu,
 	}
 }
