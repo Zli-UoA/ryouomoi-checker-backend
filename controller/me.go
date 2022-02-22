@@ -13,6 +13,7 @@ type MeController struct {
 	ujs    service.UserJWTService
 	glpu   usecase.GetLovePointUsecase
 	glptsu usecase.GetLovePointsUseCase
+	gclu   usecase.GetCurrentLoverUsecase
 	dclu   usecase.DeleteCurrentLoverUseCase
 }
 
@@ -76,6 +77,51 @@ func (m *MeController) GetLovePoint(c *gin.Context) {
 	c.JSON(200, jsonLP)
 }
 
+func (m *MeController) GetCurrentLover (c *gin.Context) {
+	token, err := GetAuthToken(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	userID, err := m.ujs.GetUserIDFromJWT(token)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	currentLover, err := m.gclu.Execute(userID)
+	if err != nil {
+		_, err := m.gclu.CheckBreakFirst(userID)
+		if errors.Is(err, usecase.BrokenCoupleError) {
+			c.JSON(500, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+		if errors.Is(err, usecase.BrokenReportError) {
+			c.JSON(410, gin.H{
+				"message": "相手に振られてしまいました。",
+			})
+			return
+		}
+		c.JSON(404, gin.H{
+			"message": "現在、彼氏・彼女はいません。",
+		})
+		return
+	}
+	jsonLover := &TwitterUser{
+		ID:          currentLover.ID,
+		ScreenName:  currentLover.ScreenName,
+		DisplayName: currentLover.DisplayName,
+		ImageUrl:    currentLover.ProfileImageUrl,
+		Biography:   currentLover.Biography,
+	}
+	c.JSON(200, jsonLover)
+}
+
 func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 	token, err := GetAuthToken(c)
 	if err != nil {
@@ -114,11 +160,12 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 	c.Status(200)
 }
 
-func NewMeController(ujs service.UserJWTService, glpu usecase.GetLovePointUsecase, glptsu usecase.GetLovePointsUseCase, dclu usecase.DeleteCurrentLoverUseCase) *MeController {
+func NewMeController(ujs service.UserJWTService, glpu usecase.GetLovePointUsecase, glptsu usecase.GetLovePointsUseCase, gclu usecase.GetCurrentLoverUsecase, dclu usecase.DeleteCurrentLoverUseCase) *MeController {
 	return &MeController{
 		ujs:    ujs,
 		glpu:   glpu,
 		glptsu: glptsu,
+		gclu:   gclu,
 		dclu:   dclu,
 	}
 }
