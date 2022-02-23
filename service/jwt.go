@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"strconv"
 )
 
 type UserJWTService interface {
@@ -22,7 +23,7 @@ type customClaims struct {
 func (u *userJWTServiceImpl) CreateUserIDJWT(userID int64) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod(jwt.SigningMethodHS256.Alg()))
 	claims := token.Claims.(jwt.MapClaims)
-	claims["userID"] = userID
+	claims["userID"] = strconv.FormatInt(userID, 10)
 	tokenString, err := token.SignedString([]byte(u.secret))
 	if err != nil {
 		return "", err
@@ -31,7 +32,7 @@ func (u *userJWTServiceImpl) CreateUserIDJWT(userID int64) (string, error) {
 }
 
 func (u *userJWTServiceImpl) GetUserIDFromJWT(token string) (int64, error) {
-	t, err := jwt.ParseWithClaims(token, &customClaims{}, func(t *jwt.Token) (interface{}, error) {
+	t, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
 		}
@@ -41,7 +42,11 @@ func (u *userJWTServiceImpl) GetUserIDFromJWT(token string) (int64, error) {
 		return 0, err
 	}
 
-	userID := t.Claims.(*customClaims).ID
+	rawUserID := t.Claims.(jwt.MapClaims)["userID"].(string)
+	userID, err := strconv.ParseInt(rawUserID, 10, 64)
+	if err != nil {
+		return 0, err
+	}
 	return userID, nil
 }
 
