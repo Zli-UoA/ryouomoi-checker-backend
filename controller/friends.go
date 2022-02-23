@@ -137,6 +137,7 @@ func (f *FriendsController) SetLovePoint(c *gin.Context) {
 		c.JSON(400, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 	matchSuccess, err := f.slpu.Execute(userID, loverUserID, req.LovePoint)
 	res := MatchResult{MatchSuccess: matchSuccess}

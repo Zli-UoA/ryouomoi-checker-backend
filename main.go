@@ -62,6 +62,7 @@ func main() {
 	}
 
 	ur := repository.NewUserRepository(db)
+	cr := repository.NewChatRepository(db)
 
 	ts := service.NewTwitterService(apiKey, apiKeySecret, callbackUrl)
 	bts := service.NewTwitterService(botApiKey, botApiKeySecret, botCallbackUrl)
@@ -70,7 +71,7 @@ func main() {
 	gtluu := usecase.NewGetTwitterLoginUrlUseCase(ts)
 	htcu := usecase.NewHandleTwitterCallbackUseCase(ts, ujs, ur)
 	fsu := usecase.NewFriendsSearchUseCase(ts, ur)
-	slpu := usecase.NewSetLovePointUseCase(5, botUserID, ur, bts)
+	slpu := usecase.NewSetLovePointUseCase(6, botUserID, ur, cr, bts)
 	gfu := usecase.NewGetFolloweesUseCase(ts, ur)
 	fru := usecase.NewGetFollowersUseCase(ts, ur)
 	glpu := usecase.NewGetLovePointUsecase(ur)

@@ -5,7 +5,7 @@ import "time"
 type ChatRoom struct {
 	ID        int64
 	Couple    *Couple
-	CreatedAt *time.Time
+	CreatedAt time.Time
 }
 
 type Chat struct {

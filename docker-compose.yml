@@ -35,6 +35,17 @@ services:
       - "8080:8080"
     depends_on:
       - db
+  chat-server:
+    build:
+      context: ./chat
+      dockerfile: Dockerfile
+    container_name: ryouomoi-checker-chat-server
+    env_file:
+      - .env.compose
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
 volumes:
   db-data:
     driver: local

@@ -185,10 +185,15 @@ func (u *userRepositoryImpl) CreateCouple(couple *model.Couple) (*model.Couple, 
 	userID1 := couple.User1.ID
 	userID2 := couple.User2.ID
 	timeNow := time.Now()
-	_, err := u.db.Exec("INSERT INTO couples (user_id_1,user_id_2,created_at) VALUES (?,?,?)", userID1, userID2, timeNow)
+	result, err := u.db.Exec("INSERT INTO couples (user_id_1,user_id_2,created_at) VALUES (?,?,?)", userID1, userID2, timeNow)
 	if err != nil {
 		return nil, err
 	}
+	coupleId, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	couple.ID = coupleId
 	couple.CreatedAt = timeNow
 	return couple, nil
 }

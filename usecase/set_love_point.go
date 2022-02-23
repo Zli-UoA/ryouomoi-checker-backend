@@ -16,6 +16,7 @@ type setLovePointUseCaseImpl struct {
 	thresholdLovePoint int
 	botUserID          int64
 	ur                 repository.UserRepository
+	cr                 repository.ChatRepository
 	tc                 service.TwitterService // bot用のTwitterServiceを受け取る(AccessTokenの権限が違うため)
 }
 
@@ -61,9 +62,14 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 	if err != nil {
 		return false, err
 	}
+	chatRoom, err := s.cr.CreateChatRoom(couple)
+	if err != nil {
+		return true, err
+	}
+	log.Println(chatRoom)
 	botUser, err := s.ur.GetUser(s.botUserID)
 	if err != nil {
-		return false, err
+		return true, err
 	}
 	user1 := couple.User1
 	user2 := couple.User2
@@ -78,11 +84,18 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 	return true, nil
 }
 
-func NewSetLovePointUseCase(thresholdLovePoint int, botUserID int64, ur repository.UserRepository, tc service.TwitterService) SetLovePointUseCase {
+func NewSetLovePointUseCase(
+	thresholdLovePoint int,
+	botUserID int64,
+	ur repository.UserRepository,
+	cr repository.ChatRepository,
+	tc service.TwitterService,
+) SetLovePointUseCase {
 	return &setLovePointUseCaseImpl{
 		thresholdLovePoint: thresholdLovePoint,
 		botUserID:          botUserID,
 		ur:                 ur,
+		cr:                 cr,
 		tc:                 tc,
 	}
 }
