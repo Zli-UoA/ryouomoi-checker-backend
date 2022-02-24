@@ -15,6 +15,39 @@ type MeController struct {
 	glptsu usecase.GetLovePointsUseCase
 	gclu   usecase.GetCurrentLoverUsecase
 	dclu   usecase.DeleteCurrentLoverUseCase
+	gliuu  usecase.GetLoggedInUserUseCase
+}
+
+func (m *MeController) GetLoggedInUser(c *gin.Context) {
+	token, err := GetAuthToken(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	userID, err := m.ujs.GetUserIDFromJWT(token)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	user, err := m.gliuu.Execute(userID)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	userJson := &TwitterUser{
+		ID:          user.ID,
+		ScreenName:  user.ScreenName,
+		DisplayName: user.DisplayName,
+		ImageUrl:    user.ProfileImageUrl,
+		Biography:   user.Biography,
+	}
+	c.JSON(200, userJson)
 }
 
 func (m *MeController) GetLovePoints(c *gin.Context) {
@@ -160,12 +193,20 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 	c.Status(200)
 }
 
-func NewMeController(ujs service.UserJWTService, glpu usecase.GetLovePointUsecase, glptsu usecase.GetLovePointsUseCase, gclu usecase.GetCurrentLoverUsecase, dclu usecase.DeleteCurrentLoverUseCase) *MeController {
+func NewMeController(
+	ujs service.UserJWTService,
+	glpu usecase.GetLovePointUsecase,
+	glptsu usecase.GetLovePointsUseCase,
+	gclu usecase.GetCurrentLoverUsecase,
+	dclu usecase.DeleteCurrentLoverUseCase,
+	gliuu usecase.GetLoggedInUserUseCase,
+) *MeController {
 	return &MeController{
 		ujs:    ujs,
 		glpu:   glpu,
 		glptsu: glptsu,
 		gclu:   gclu,
 		dclu:   dclu,
+		gliuu:  gliuu,
 	}
 }
