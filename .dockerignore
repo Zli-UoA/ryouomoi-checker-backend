@@ -10,6 +10,7 @@ Makefile
 NOTICE
 README.md
 docker-compose.yml
+nginx.conf
 arm/
 powerpc/
 mips/
