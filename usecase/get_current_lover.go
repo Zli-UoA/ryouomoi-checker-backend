@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/repository"
+	"time"
 )
 
 type GetCurrentLoverUsecase interface {
@@ -16,8 +17,9 @@ type getCurrentLoverUsecaseImpl struct {
 }
 
 var (
-	BrokenCoupleError = errors.New("NoRows_latestBrokenCouple")
-	BrokenReportError = errors.New("NoRows_BrokenReport")
+	BrokenCoupleError           = errors.New("NoRows_latestBrokenCouple")
+	BrokenReportError           = errors.New("NoRows_BrokenReport")
+	BrokenCoupleNotExpiredError = errors.New("broken couple not expired")
 )
 
 func (g *getCurrentLoverUsecaseImpl) CheckBreakFirst(userID int64) (*model.BrokeReport, error) {
@@ -29,13 +31,18 @@ func (g *getCurrentLoverUsecaseImpl) CheckBreakFirst(userID int64) (*model.Broke
 	if err != nil {
 		return nil, BrokenReportError
 	}
+	now := time.Now()
+	expiredAt := couple.BrokenAt.AddDate(0, 1, 0)
+	if now.Before(expiredAt) {
+		return nil, BrokenCoupleNotExpiredError
+	}
 	return brokeReport, nil
-
 }
 
 func (g *getCurrentLoverUsecaseImpl) Execute(userID int64) (*model.TwitterUser, error) {
 	couple, err := g.ur.GetCurrentCouple(userID)
 	if err != nil {
+		_, err := g.CheckBreakFirst(userID)
 		return nil, err
 	}
 	var lover *model.User
