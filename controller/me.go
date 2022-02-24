@@ -127,7 +127,6 @@ func (m *MeController) GetCurrentLover(c *gin.Context) {
 	}
 	currentLover, err := m.gclu.Execute(userID)
 	if err != nil {
-		_, err := m.gclu.CheckBreakFirst(userID)
 		if errors.Is(err, usecase.BrokenCoupleError) {
 			c.JSON(500, gin.H{
 				"message": err.Error(),
@@ -140,9 +139,18 @@ func (m *MeController) GetCurrentLover(c *gin.Context) {
 			})
 			return
 		}
-		c.JSON(404, gin.H{
-			"message": "現在、彼氏・彼女はいません。",
-		})
+		if errors.Is(err, usecase.BrokenCoupleNotExpiredError) {
+			c.JSON(425, gin.H{
+				"message": "破局してから1ヶ月以上経過していません。",
+			})
+			return
+		}
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(404, gin.H{
+				"message": "現在、彼氏・彼女はいません。",
+			})
+			return
+		}
 		return
 	}
 	jsonLover := &TwitterUser{
@@ -176,6 +184,7 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 		c.JSON(400, gin.H{
 			"message": err.Error(),
 		})
+		return
 	}
 	err = m.dclu.Execute(userID, req.ReasonID, req.AllowShare)
 	if err != nil {
