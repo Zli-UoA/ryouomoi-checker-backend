@@ -136,6 +136,29 @@ paths:
                   lovePoint: 3
       security:
         - dummy_token: []
+  /me:
+    get:
+      summary: GET logged in user
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwitterUser'
+              examples:
+                example-1:
+                  value:
+                    id: 0
+                    screenNme: yt8492
+                    displayName: マヤミト
+                    imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                    biography: オタクです
+      operationId: get-me
+      description: ログインしているユーザーの情報の取得
+      security:
+        - dummy_token: []
   /me/lover:
     get:
       summary: GET current lover
