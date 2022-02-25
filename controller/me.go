@@ -12,6 +12,7 @@ import (
 type MeController struct {
 	ujs    service.UserJWTService
 	glpu   usecase.GetLovePointUsecase
+	dlpu   usecase.DeleteLovePointUseCase
 	glptsu usecase.GetLovePointsUseCase
 	gclu   usecase.GetCurrentLoverUsecase
 	gcedu  usecase.GetCoupleElapsedDaysUseCase
@@ -109,6 +110,45 @@ func (m *MeController) GetLovePoint(c *gin.Context) {
 	}
 	jsonLP := LovePoint{LovePoint: lovePoint.LovePoint}
 	c.JSON(200, jsonLP)
+}
+
+func (m *MeController) DeleteLovePoint(c *gin.Context) {
+	token, err := GetAuthToken(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	userID, err := m.ujs.GetUserIDFromJWT(token)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	loverIDStr := c.Param("id")
+	loverID, err := strconv.ParseInt(loverIDStr, 10, 64)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = m.dlpu.Execute(userID, loverID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(404, gin.H{
+				"message": "好き度が設定されていません。",
+			})
+			return
+		}
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.Status(200)
 }
 
 func (m *MeController) GetCurrentLover(c *gin.Context) {
@@ -235,6 +275,7 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 func NewMeController(
 	ujs service.UserJWTService,
 	glpu usecase.GetLovePointUsecase,
+	dlpu usecase.DeleteLovePointUseCase,
 	glptsu usecase.GetLovePointsUseCase,
 	gclu usecase.GetCurrentLoverUsecase,
 	gcedu usecase.GetCoupleElapsedDaysUseCase,
@@ -244,6 +285,7 @@ func NewMeController(
 	return &MeController{
 		ujs:    ujs,
 		glpu:   glpu,
+		dlpu:   dlpu,
 		glptsu: glptsu,
 		gclu:   gclu,
 		gcedu:  gcedu,

@@ -75,6 +75,7 @@ func main() {
 	gfu := usecase.NewGetFolloweesUseCase(ts, ur)
 	fru := usecase.NewGetFollowersUseCase(ts, ur)
 	glpu := usecase.NewGetLovePointUsecase(ur)
+	dlpu := usecase.NewDeleteLovePointUseCase(ur)
 	glptsu := usecase.NewGetLovePointsUseCase(ur, ts)
 	gclu := usecase.NewGetCurrentLover(ur)
 	gcedu := usecase.NewGetCoupleElapsedDaysUseCase(ur)
@@ -88,7 +89,7 @@ func main() {
 		usecase.NewHandleTwitterCallbackUseCase(bts, ujs, ur),
 	)
 	fc := controller.NewFriendsController(ujs, fsu, slpu, gfu, fru)
-	mc := controller.NewMeController(ujs, glpu, glptsu, gclu, gcedu, dclu, gliuu)
+	mc := controller.NewMeController(ujs, glpu, dlpu, glptsu, gclu, gcedu, dclu, gliuu)
 
 	r := gin.Default()
 
@@ -112,6 +113,7 @@ func main() {
 	r.GET("/me", mc.GetLoggedInUser)
 	r.GET("/me/lovers", mc.GetLovePoints)
 	r.GET("/me/lovers/:id", mc.GetLovePoint)
+	r.DELETE("/me/lovers/:id", mc.DeleteLovePoint)
 	r.GET("/me/lover", mc.GetCurrentLover)
 	r.GET("/me/lover/days", mc.GetCoupleElapsedDays)
 	r.DELETE("/me/lover", mc.DeleteCurrentLover)
