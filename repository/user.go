@@ -147,7 +147,7 @@ func (u *userRepositoryImpl) GetLovePoints(userID int64) ([]*model.UserLovePoint
 	return res, nil
 }
 func (u *userRepositoryImpl) SetLovePoint(point *model.UserLovePoint) (*model.UserLovePoint, error) { //test done
-	res, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint, point.ID, point.LoverUserID)
+	res, err := u.db.Exec("UPDATE user_love_points SET love_point= ? where user_id= ? AND lover_user_id= ?", point.LovePoint, point.UserID, point.LoverUserID)
 	if err != nil {
 		return nil, err
 	}
