@@ -2,8 +2,6 @@ version: "3"
 services:
   openapi-ui:
     image: swaggerapi/swagger-ui:v4.5.0
-    ports:
-      - "8081:8080"
     environment:
       SWAGGER_JSON: /openapi/openapi.yaml
     volumes:
@@ -22,8 +20,6 @@ services:
       MYSQL_USER: ryouomoi-checker
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: ryouomoi-checker-db
-    ports:
-      - "3306:3306"
   server:
     build:
       context: .
@@ -31,8 +27,6 @@ services:
     container_name: ryouomoi-checker-server
     env_file:
       - .env.compose
-    ports:
-      - "8080:8080"
     depends_on:
       - db
   chat-server:
@@ -46,6 +40,15 @@ services:
       - "3001:3001"
     depends_on:
       - db
+  nginx:
+    image: nginx:1.21.6-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - server
+      - chat-server
 volumes:
   db-data:
     driver: local
