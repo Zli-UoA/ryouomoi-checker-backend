@@ -154,6 +154,9 @@ func (m *MeController) GetCurrentLover(c *gin.Context) {
 			})
 			return
 		}
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 	jsonLover := &TwitterUser{

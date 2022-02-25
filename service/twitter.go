@@ -44,6 +44,18 @@ type twitterServiceImpl struct {
 	requestTokenMap map[string]*oauth.RequestToken
 }
 
+func convertToModel(userObj *userObject) *model.TwitterUser {
+	normalUrl := userObj.ProfileImageURL
+	originUrl := strings.Join(strings.Split(normalUrl, "_normal"), "")
+	return &model.TwitterUser{
+		ID:              userObj.ID,
+		DisplayName:     userObj.Name,
+		ScreenName:      userObj.ScreenName,
+		ProfileImageUrl: originUrl,
+		Biography:       userObj.Description,
+	}
+}
+
 const (
 	requestTokenURL    = "https://api.twitter.com/oauth/request_token"
 	authorizationURL   = "https://api.twitter.com/oauth/authenticate"
@@ -101,13 +113,7 @@ func (c *twitterServiceImpl) GetUser(token *oauth.AccessToken) (*model.TwitterUs
 		return nil, err
 	}
 
-	user := &model.TwitterUser{
-		ID:              userObj.ID,
-		DisplayName:     userObj.Name,
-		ScreenName:      userObj.ScreenName,
-		ProfileImageUrl: userObj.ProfileImageURL,
-		Biography:       userObj.Description,
-	}
+	user := convertToModel(userObj)
 	return user, nil
 }
 
@@ -138,13 +144,7 @@ func (c *twitterServiceImpl) GetFollowers(token *oauth.AccessToken) ([]*model.Tw
 		}
 
 		for _, userObj := range usersObj.Users {
-			users = append(users, &model.TwitterUser{
-				ID:              userObj.ID,
-				DisplayName:     userObj.Name,
-				ScreenName:      userObj.ScreenName,
-				ProfileImageUrl: userObj.ProfileImageURL,
-				Biography:       userObj.Description,
-			})
+			users = append(users, convertToModel(&userObj))
 		}
 
 		if usersObj.NextCursor == 0 {
@@ -183,13 +183,7 @@ func (c *twitterServiceImpl) GetFollowees(token *oauth.AccessToken) ([]*model.Tw
 		}
 
 		for _, userObj := range usersObj.Users {
-			users = append(users, &model.TwitterUser{
-				ID:              userObj.ID,
-				DisplayName:     userObj.Name,
-				ScreenName:      userObj.ScreenName,
-				ProfileImageUrl: userObj.ProfileImageURL,
-				Biography:       userObj.Description,
-			})
+			users = append(users, convertToModel(&userObj))
 		}
 
 		if usersObj.NextCursor == 0 {
@@ -225,13 +219,7 @@ func (c *twitterServiceImpl) Search(token *oauth.AccessToken, query string) ([]*
 	var users []*model.TwitterUser
 
 	for _, userObj := range *usersObj {
-		users = append(users, &model.TwitterUser{
-			ID:              userObj.ID,
-			DisplayName:     userObj.Name,
-			ScreenName:      userObj.ScreenName,
-			ProfileImageUrl: userObj.ProfileImageURL,
-			Biography:       userObj.Description,
-		})
+		users = append(users, convertToModel(&userObj))
 	}
 	return users, nil
 }
@@ -266,13 +254,7 @@ func (c *twitterServiceImpl) Lookup(token *oauth.AccessToken, ids []int64) ([]*m
 	var users []*model.TwitterUser
 
 	for _, userObj := range *usersObj {
-		users = append(users, &model.TwitterUser{
-			ID:              userObj.ID,
-			DisplayName:     userObj.Name,
-			ScreenName:      userObj.ScreenName,
-			ProfileImageUrl: userObj.ProfileImageURL,
-			Biography:       userObj.Description,
-		})
+		users = append(users, convertToModel(&userObj))
 	}
 	return users, nil
 }
@@ -298,13 +280,7 @@ func (c *twitterServiceImpl) Show(token *oauth.AccessToken, id int64) (*model.Tw
 		return nil, err
 	}
 
-	user := &model.TwitterUser{
-		ID:              userObj.ID,
-		DisplayName:     userObj.Name,
-		ScreenName:      userObj.ScreenName,
-		ProfileImageUrl: userObj.ProfileImageURL,
-		Biography:       userObj.Description,
-	}
+	user := convertToModel(userObj)
 	return user, nil
 }
 

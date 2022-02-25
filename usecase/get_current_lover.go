@@ -21,7 +21,7 @@ type BrokenCoupleNotExpiredError struct {
 	RemainDays int
 }
 
-func (b BrokenCoupleNotExpiredError) Error() string {
+func (b *BrokenCoupleNotExpiredError) Error() string {
 	return fmt.Sprintf("破局期間残り%v日", b.RemainDays)
 }
 
@@ -44,7 +44,7 @@ func (g *getCurrentLoverUsecaseImpl) CheckBreakFirst(userID int64) (*model.Broke
 	if now.Before(expiredAt) {
 		remainDuration := expiredAt.Sub(now)
 		remainDays := remainDuration.Hours() / 24
-		return nil, BrokenCoupleNotExpiredError{
+		return nil, &BrokenCoupleNotExpiredError{
 			RemainDays: int(remainDays),
 		}
 	}
