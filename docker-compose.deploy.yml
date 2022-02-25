@@ -1,11 +1,5 @@
 version: "3"
 services:
-  openapi-ui:
-    image: swaggerapi/swagger-ui:v4.5.0
-    environment:
-      SWAGGER_JSON: /openapi/openapi.yaml
-    volumes:
-      - ./openapi:/openapi
   db:
     platform: linux/x86_64
     image: mysql:8.0.28
