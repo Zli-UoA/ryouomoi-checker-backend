@@ -44,7 +44,9 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 		now := time.Now()
 		expireAt := brokenCouple.BrokenAt.AddDate(0, 1, 0)
 		if now.Before(expireAt) {
-			return false, BrokenCoupleNotExpiredError
+			remainDuration := expireAt.Sub(now)
+			remainDays := remainDuration.Hours() / 24
+			return false, &BrokenCoupleNotExpiredError{RemainDays: int(remainDays)}
 		}
 	}
 	userLovePoint := &model.UserLovePoint{

@@ -142,9 +142,11 @@ func (f *FriendsController) SetLovePoint(c *gin.Context) {
 	}
 	matchSuccess, err := f.slpu.Execute(userID, loverUserID, req.LovePoint)
 	if err != nil {
-		if errors.Is(err, usecase.BrokenCoupleNotExpiredError) {
+		var target *usecase.BrokenCoupleNotExpiredError
+		if errors.As(err, &target) {
 			c.JSON(425, gin.H{
-				"message": "前回の破局からまだ1ヶ月以上経過していません。",
+				"message":    "破局してから1ヶ月以上経過していません。",
+				"remainDays": target.RemainDays,
 			})
 			return
 		}
