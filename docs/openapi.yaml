@@ -4,7 +4,7 @@ info:
   version: '1.0'
   description: ''
 servers:
-  - url: 'http://localhost:3000'
+  - url: 'https://ryouomoichecker.yt8492.com/api'
 paths:
   /friends/search:
     get:
