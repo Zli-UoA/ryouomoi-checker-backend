@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/usecase"
@@ -140,6 +141,18 @@ func (f *FriendsController) SetLovePoint(c *gin.Context) {
 		return
 	}
 	matchSuccess, err := f.slpu.Execute(userID, loverUserID, req.LovePoint)
+	if err != nil {
+		if errors.Is(err, usecase.BrokenCoupleNotExpiredError) {
+			c.JSON(425, gin.H{
+				"message": "前回の破局からまだ1ヶ月以上経過していません。",
+			})
+			return
+		}
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
 	res := MatchResult{MatchSuccess: matchSuccess}
 	c.JSON(200, res)
 }

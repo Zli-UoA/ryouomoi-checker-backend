@@ -1,11 +1,13 @@
 package usecase
 
 import (
+	"errors"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/repository"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"log"
 	"strconv"
+	"time"
 )
 
 type SetLovePointUseCase interface {
@@ -20,6 +22,10 @@ type setLovePointUseCaseImpl struct {
 	tc                 service.TwitterService // bot用のTwitterServiceを受け取る(AccessTokenの権限が違うため)
 }
 
+var (
+	CoupleAlreadyExistError = errors.New("couple already exist")
+)
+
 func createTwitterDMLink(userID int64) string {
 	return "https://twitter.com/messages/compose?recipient_id=" + strconv.FormatInt(userID, 10)
 }
@@ -29,6 +35,18 @@ func createMessage(loverName, talkRoomUrl string) string {
 }
 
 func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint int) (bool, error) {
+	_, err := s.ur.GetCurrentCouple(userID)
+	if err == nil {
+		return false, CoupleAlreadyExistError
+	}
+	brokenCouple, err := s.ur.GetLatestBrokenCouple(userID)
+	if err == nil {
+		now := time.Now()
+		expireAt := brokenCouple.BrokenAt.AddDate(0, 1, 0)
+		if now.Before(expireAt) {
+			return false, BrokenCoupleNotExpiredError
+		}
+	}
 	userLovePoint := &model.UserLovePoint{
 		ID:          0,
 		UserID:      userID,
