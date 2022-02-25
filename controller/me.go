@@ -14,6 +14,7 @@ type MeController struct {
 	glpu   usecase.GetLovePointUsecase
 	glptsu usecase.GetLovePointsUseCase
 	gclu   usecase.GetCurrentLoverUsecase
+	gcedu  usecase.GetCoupleElapsedDaysUseCase
 	dclu   usecase.DeleteCurrentLoverUseCase
 	gliuu  usecase.GetLoggedInUserUseCase
 }
@@ -128,8 +129,8 @@ func (m *MeController) GetCurrentLover(c *gin.Context) {
 	currentLover, err := m.gclu.Execute(userID)
 	if err != nil {
 		if errors.Is(err, usecase.BrokenCoupleError) {
-			c.JSON(500, gin.H{
-				"message": err.Error(),
+			c.JSON(404, gin.H{
+				"message": "現在、彼氏・彼女はいません。",
 			})
 			return
 		}
@@ -161,6 +162,33 @@ func (m *MeController) GetCurrentLover(c *gin.Context) {
 		Biography:   currentLover.Biography,
 	}
 	c.JSON(200, jsonLover)
+}
+
+func (m *MeController) GetCoupleElapsedDays(c *gin.Context) {
+	token, err := GetAuthToken(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	userID, err := m.ujs.GetUserIDFromJWT(token)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	days, err := m.gcedu.Execute(userID)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"days": days,
+	})
 }
 
 func (m *MeController) DeleteCurrentLover(c *gin.Context) {
@@ -207,6 +235,7 @@ func NewMeController(
 	glpu usecase.GetLovePointUsecase,
 	glptsu usecase.GetLovePointsUseCase,
 	gclu usecase.GetCurrentLoverUsecase,
+	gcedu usecase.GetCoupleElapsedDaysUseCase,
 	dclu usecase.DeleteCurrentLoverUseCase,
 	gliuu usecase.GetLoggedInUserUseCase,
 ) *MeController {
@@ -215,6 +244,7 @@ func NewMeController(
 		glpu:   glpu,
 		glptsu: glptsu,
 		gclu:   gclu,
+		gcedu:  gcedu,
 		dclu:   dclu,
 		gliuu:  gliuu,
 	}
