@@ -10,7 +10,7 @@ import (
 
 type GetCurrentLoverUsecase interface {
 	CheckBreakFirst(userID int64) (*model.BrokeReport, error)
-	Execute(userID int64) (*model.TwitterUser, error)
+	Execute(userID int64) (*model.Lover, error)
 }
 
 type getCurrentLoverUsecaseImpl struct {
@@ -51,25 +51,33 @@ func (g *getCurrentLoverUsecaseImpl) CheckBreakFirst(userID int64) (*model.Broke
 	return brokeReport, nil
 }
 
-func (g *getCurrentLoverUsecaseImpl) Execute(userID int64) (*model.TwitterUser, error) {
+func (g *getCurrentLoverUsecaseImpl) getTalkRoomUrl(loverUser *model.User) string {
+	return createTwitterDMLink(loverUser.ID)
+}
+
+func (g *getCurrentLoverUsecaseImpl) Execute(userID int64) (*model.Lover, error) {
 	couple, err := g.ur.GetCurrentCouple(userID)
 	if err != nil {
 		_, err := g.CheckBreakFirst(userID)
 		return nil, err
 	}
-	var lover *model.User
+	var loverUser *model.User
 	if couple.User1.ID == userID {
-		lover = couple.User2
+		loverUser = couple.User2
 	} else {
-		lover = couple.User1
+		loverUser = couple.User1
 	}
-	return &model.TwitterUser{
-		ID:              lover.ID,
-		ScreenName:      lover.ScreenName,
-		DisplayName:     lover.DisplayName,
-		ProfileImageUrl: lover.ProfileImageUrl,
-		Biography:       lover.Biography,
-	}, nil
+	lover := &model.Lover{
+		User: &model.TwitterUser{
+			ID:              loverUser.ID,
+			ScreenName:      loverUser.ScreenName,
+			DisplayName:     loverUser.DisplayName,
+			ProfileImageUrl: loverUser.ProfileImageUrl,
+			Biography:       loverUser.Biography,
+		},
+		TalkRoomUrl: createTwitterDMLink(loverUser.ID),
+	}
+	return lover, nil
 }
 
 func NewGetCurrentLover(ur repository.UserRepository) GetCurrentLoverUsecase {
