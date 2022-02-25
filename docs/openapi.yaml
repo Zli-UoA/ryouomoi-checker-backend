@@ -125,6 +125,17 @@ paths:
                 example-1:
                   value:
                     match_success: true
+        '425':
+          description: Too Early
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  remainDays:
+                    type: string
       requestBody:
         content:
           application/json:
@@ -180,6 +191,22 @@ paths:
                     biography: オタクです
         '404':
           description: Not Found
+        '425':
+          description: Too Early
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  remainDays:
+                    type: integer
+              examples:
+                example-1:
+                  value:
+                    message: string
+                    remainDays: 0
       operationId: get-me-lover
       security:
         - dummy_token: []

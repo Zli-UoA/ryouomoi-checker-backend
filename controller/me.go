@@ -140,9 +140,11 @@ func (m *MeController) GetCurrentLover(c *gin.Context) {
 			})
 			return
 		}
-		if errors.Is(err, usecase.BrokenCoupleNotExpiredError) {
+		var target *usecase.BrokenCoupleNotExpiredError
+		if errors.As(err, &target) {
 			c.JSON(425, gin.H{
-				"message": "破局してから1ヶ月以上経過していません。",
+				"message":    "破局してから1ヶ月以上経過していません。",
+				"remainDays": target.RemainDays,
 			})
 			return
 		}
