@@ -110,6 +110,14 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 	if err != nil {
 		log.Println(err)
 	}
+	err = s.tc.SendDirectMessage(user1.TwitterAccessToken, user2.ID, "好きです")
+	if err != nil {
+		log.Println(err)
+	}
+	err = s.tc.SendDirectMessage(user2.TwitterAccessToken, user1.ID, "好きです")
+	if err != nil {
+		log.Println(err)
+	}
 	return lover, nil
 }
 
