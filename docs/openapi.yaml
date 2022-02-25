@@ -121,10 +121,23 @@ paths:
                 properties:
                   match_success:
                     type: boolean
+                  lover:
+                    $ref: '#/components/schemas/Lover'
               examples:
                 example-1:
                   value:
+                    match_success: false
+                example-2:
+                  value:
                     match_success: true
+                    lover:
+                      user:
+                        id: 0
+                        screenNme: yt8492
+                        displayName: マヤミト
+                        imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                        biography: オタクです
+                      talkRoomUrl: 'https://twitter.com/messages/compose?recipient_id=972404402425245697'
         '425':
           description: Too Early
           content:
@@ -180,15 +193,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TwitterUser'
+                $ref: '#/components/schemas/Lover'
               examples:
                 example-1:
                   value:
-                    id: 0
-                    screenNme: yt8492
-                    displayName: マヤミト
-                    imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
-                    biography: オタクです
+                    user:
+                      id: 0
+                      screenNme: yt8492
+                      displayName: マヤミト
+                      imageUrl: 'https://pbs.twimg.com/profile_images/1377462231000997889/3JIrjbd6_normal.jpg'
+                      biography: オタクです
+                    talkRoomUrl: 'https://twitter.com/messages/compose?recipient_id=972404402425245697'
         '404':
           description: Not Found
         '425':
@@ -389,6 +404,14 @@ components:
         lovePoint:
           type: integer
       description: ''
+    Lover:
+      title: Lover
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/TwitterUser'
+        talkRoomUrl:
+          type: string
   securitySchemes:
     dummy_token:
       type: http

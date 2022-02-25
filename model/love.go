@@ -9,6 +9,11 @@ type UserLovePoint struct {
 	LovePoint   int
 }
 
+type Lover struct {
+	User        *TwitterUser
+	TalkRoomUrl string
+}
+
 type UserLovePointWithTwitterUser struct {
 	ID        int64
 	UserID    int64

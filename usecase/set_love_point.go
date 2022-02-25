@@ -11,7 +11,7 @@ import (
 )
 
 type SetLovePointUseCase interface {
-	Execute(userID, loverUserID int64, lovePoint int) (bool, error)
+	Execute(userID, loverUserID int64, lovePoint int) (*model.Lover, error)
 }
 
 type setLovePointUseCaseImpl struct {
@@ -34,10 +34,10 @@ func createMessage(loverName, talkRoomUrl string) string {
 	return loverName + "さんと両思いになりました。トークルームでお話しましょう。\n" + talkRoomUrl
 }
 
-func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint int) (bool, error) {
+func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint int) (*model.Lover, error) {
 	_, err := s.ur.GetCurrentCouple(userID)
 	if err == nil {
-		return false, CoupleAlreadyExistError
+		return nil, CoupleAlreadyExistError
 	}
 	brokenCouple, err := s.ur.GetLatestBrokenCouple(userID)
 	if err == nil {
@@ -46,7 +46,7 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 		if now.Before(expireAt) {
 			remainDuration := expireAt.Sub(now)
 			remainDays := remainDuration.Hours() / 24
-			return false, &BrokenCoupleNotExpiredError{RemainDays: int(remainDays)}
+			return nil, &BrokenCoupleNotExpiredError{RemainDays: int(remainDays)}
 		}
 	}
 	userLovePoint := &model.UserLovePoint{
@@ -57,22 +57,22 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 	}
 	user, err := s.ur.GetUser(userID)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	_, err = s.ur.SetLovePoint(userLovePoint)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	loverUser, err := s.ur.GetUser(loverUserID)
 	if err != nil {
-		return false, nil
+		return nil, nil
 	}
 	loverUserLovePoint, err := s.ur.GetLovePoint(loverUserID, userID)
 	if err != nil {
-		return false, nil
+		return nil, nil
 	}
 	if lovePoint+loverUserLovePoint.LovePoint < s.thresholdLovePoint {
-		return false, nil
+		return nil, nil
 	}
 	couple := &model.Couple{
 		User1: user,
@@ -80,16 +80,25 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 	}
 	_, err = s.ur.CreateCouple(couple)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	chatRoom, err := s.cr.CreateChatRoom(couple)
+	lover := &model.Lover{
+		User: &model.TwitterUser{
+			ID:              loverUser.ID,
+			ScreenName:      loverUser.ScreenName,
+			DisplayName:     loverUser.DisplayName,
+			ProfileImageUrl: loverUser.ProfileImageUrl,
+			Biography:       loverUser.Biography,
+		},
+		TalkRoomUrl: createTwitterDMLink(loverUser.ID),
+	}
+	_, err = s.cr.CreateChatRoom(couple)
 	if err != nil {
-		return true, err
+		return lover, err
 	}
-	log.Println(chatRoom)
 	botUser, err := s.ur.GetUser(s.botUserID)
 	if err != nil {
-		return true, err
+		return lover, err
 	}
 	user1 := couple.User1
 	user2 := couple.User2
@@ -101,7 +110,7 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 	if err != nil {
 		log.Println(err)
 	}
-	return true, nil
+	return lover, nil
 }
 
 func NewSetLovePointUseCase(

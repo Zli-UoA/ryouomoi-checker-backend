@@ -159,12 +159,9 @@ func (m *MeController) GetCurrentLover(c *gin.Context) {
 		})
 		return
 	}
-	jsonLover := &TwitterUser{
-		ID:          currentLover.ID,
-		ScreenName:  currentLover.ScreenName,
-		DisplayName: currentLover.DisplayName,
-		ImageUrl:    currentLover.ProfileImageUrl,
-		Biography:   currentLover.Biography,
+	jsonLover := &Lover{
+		User:        convertToJson(currentLover.User),
+		TalkRoomUrl: currentLover.TalkRoomUrl,
 	}
 	c.JSON(200, jsonLover)
 }

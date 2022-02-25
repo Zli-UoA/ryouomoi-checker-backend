@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"github.com/Zli-UoA/ryouomoi-checker-backend/model"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/service"
 	"github.com/Zli-UoA/ryouomoi-checker-backend/usecase"
 	"github.com/gin-gonic/gin"
@@ -15,16 +14,6 @@ type FriendsController struct {
 	slpu usecase.SetLovePointUseCase
 	gfu  usecase.GetFolloweesUseCase
 	fru  usecase.GetFollowersUseCase
-}
-
-func convertToJson(twitterUser *model.TwitterUser) *TwitterUser {
-	return &TwitterUser{
-		ID:          twitterUser.ID,
-		ScreenName:  twitterUser.ScreenName,
-		DisplayName: twitterUser.DisplayName,
-		ImageUrl:    twitterUser.ProfileImageUrl,
-		Biography:   twitterUser.Biography,
-	}
 }
 
 func (f *FriendsController) FriendsSearch(c *gin.Context) {
@@ -140,7 +129,7 @@ func (f *FriendsController) SetLovePoint(c *gin.Context) {
 		})
 		return
 	}
-	matchSuccess, err := f.slpu.Execute(userID, loverUserID, req.LovePoint)
+	lover, err := f.slpu.Execute(userID, loverUserID, req.LovePoint)
 	if err != nil {
 		var target *usecase.BrokenCoupleNotExpiredError
 		if errors.As(err, &target) {
@@ -155,7 +144,15 @@ func (f *FriendsController) SetLovePoint(c *gin.Context) {
 		})
 		return
 	}
-	res := MatchResult{MatchSuccess: matchSuccess}
+	res := MatchResult{
+		MatchSuccess: lover != nil,
+	}
+	if lover != nil {
+		res.Lover = &Lover{
+			User:        convertToJson(lover.User),
+			TalkRoomUrl: lover.TalkRoomUrl,
+		}
+	}
 	c.JSON(200, res)
 }
 
