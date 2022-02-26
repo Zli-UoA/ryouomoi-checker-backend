@@ -98,7 +98,7 @@ func (s *setLovePointUseCaseImpl) Execute(userID, loverUserID int64, lovePoint i
 	}
 	botUser, err := s.ur.GetUser(s.botUserID)
 	if err != nil {
-		return lover, err
+		return lover, nil
 	}
 	user1 := couple.User1
 	user2 := couple.User2
