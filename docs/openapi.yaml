@@ -122,17 +122,17 @@ paths:
               schema:
                 type: object
                 properties:
-                  match_success:
+                  matchSuccess:
                     type: boolean
                   lover:
                     $ref: '#/components/schemas/Lover'
               examples:
                 example-1:
                   value:
-                    match_success: false
+                    matchSuccess: false
                 example-2:
                   value:
-                    match_success: true
+                    matchSuccess: true
                     lover:
                       user:
                         id: 0
