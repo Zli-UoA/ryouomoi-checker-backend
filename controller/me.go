@@ -266,10 +266,17 @@ func (m *MeController) DeleteCurrentLover(c *gin.Context) {
 	}
 	err = m.dclu.Execute(userID, req.ReasonID, req.AllowShare)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, usecase.ErrorBrokeReportAlreadyExists) {
+		if errors.Is(err, usecase.ErrorBrokeReportAlreadyExists) {
+			c.JSON(410, gin.H{
+				"message": "既に破局手続きをしています",
+			})
+			return
+		}
+		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(404, gin.H{
 				"message": err.Error(),
 			})
+			return
 		} else {
 			c.JSON(500, gin.H{
 				"message": err.Error(),
