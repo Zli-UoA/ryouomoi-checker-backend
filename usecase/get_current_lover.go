@@ -9,7 +9,7 @@ import (
 )
 
 type GetCurrentLoverUsecase interface {
-	CheckBreakFirst(userID int64) (*model.BrokeReport, error)
+	CheckBrokeCouple(userID int64) (*model.BrokeReport, error)
 	Execute(userID int64) (*model.Lover, error)
 }
 
@@ -27,17 +27,30 @@ func (b *BrokenCoupleNotExpiredError) Error() string {
 
 var (
 	BrokenCoupleError = errors.New("NoRows_latestBrokenCouple")
-	BrokenReportError = errors.New("NoRows_BrokenReport")
 )
 
-func (g *getCurrentLoverUsecaseImpl) CheckBreakFirst(userID int64) (*model.BrokeReport, error) {
+type BrokeReportNotFoundError struct {
+	Lover *model.User
+}
+
+func (c *BrokeReportNotFoundError) Error() string {
+	return fmt.Sprintf("%vにフラれました。破局手続きを行ってください。", c.Lover.DisplayName)
+}
+
+func (g *getCurrentLoverUsecaseImpl) CheckBrokeCouple(userID int64) (*model.BrokeReport, error) {
 	couple, err := g.ur.GetLatestBrokenCouple(userID)
 	if err != nil {
 		return nil, BrokenCoupleError
 	}
 	brokeReport, err := g.ur.GetBrokeReport(userID, couple.ID)
 	if err != nil {
-		return nil, BrokenReportError
+		var lover *model.User
+		if couple.User1.ID == userID {
+			lover = couple.User2
+		} else {
+			lover = couple.User1
+		}
+		return nil, &BrokeReportNotFoundError{Lover: lover}
 	}
 	now := time.Now()
 	expiredAt := couple.BrokenAt.AddDate(0, 1, 0)
@@ -58,7 +71,7 @@ func (g *getCurrentLoverUsecaseImpl) getTalkRoomUrl(loverUser *model.User) strin
 func (g *getCurrentLoverUsecaseImpl) Execute(userID int64) (*model.Lover, error) {
 	couple, err := g.ur.GetCurrentCouple(userID)
 	if err != nil {
-		_, err := g.CheckBreakFirst(userID)
+		_, err := g.CheckBrokeCouple(userID)
 		return nil, err
 	}
 	var loverUser *model.User

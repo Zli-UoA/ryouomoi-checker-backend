@@ -174,17 +174,25 @@ func (m *MeController) GetCurrentLover(c *gin.Context) {
 			})
 			return
 		}
-		if errors.Is(err, usecase.BrokenReportError) {
+		var brokeReportNotFoundError *usecase.BrokeReportNotFoundError
+		if errors.As(err, &brokeReportNotFoundError) {
 			c.JSON(410, gin.H{
 				"message": "相手に振られてしまいました。",
+				"lover": &TwitterUser{
+					ID:          brokeReportNotFoundError.Lover.ID,
+					ScreenName:  brokeReportNotFoundError.Lover.ScreenName,
+					DisplayName: brokeReportNotFoundError.Lover.DisplayName,
+					ImageUrl:    brokeReportNotFoundError.Lover.ProfileImageUrl,
+					Biography:   brokeReportNotFoundError.Lover.Biography,
+				},
 			})
 			return
 		}
-		var target *usecase.BrokenCoupleNotExpiredError
-		if errors.As(err, &target) {
+		var brokenCoupleNotExpiredError *usecase.BrokenCoupleNotExpiredError
+		if errors.As(err, &brokenCoupleNotExpiredError) {
 			c.JSON(425, gin.H{
 				"message":    "破局してから1ヶ月以上経過していません。",
-				"remainDays": target.RemainDays,
+				"remainDays": brokenCoupleNotExpiredError.RemainDays,
 			})
 			return
 		}
